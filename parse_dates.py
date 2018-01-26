@@ -25,8 +25,14 @@ logger.debug('settings: %s' % settings)
 input_file = settings['input_file']
 logger.debug('input file: %s' % input_file)
 
+do_missing_year_fix = False
 count = 0
-with open('./output/clean.csv', 'w', newline='') as output_fp:
+if do_missing_year_fix:
+    output_file = './output/clean.csv'
+else:
+    output_file = './output/clean-no-2000-fix.csv'
+
+with open(output_file, 'w', newline='') as output_fp:
     writer = csv.writer(output_fp)
     headings = [settings['heading_one'], settings['heading_two'], settings['heading_three']]
     logger.debug('headings: %s' % headings)
@@ -55,7 +61,13 @@ with open('./output/clean.csv', 'w', newline='') as output_fp:
             else:
                 date_day = int(row[2])
                 date = datetime.date(2000, 1, 1) + datetime.timedelta(days=date_day)
-            writer.writerow([tail, date, hours])
+
+            # only always write if we're doing the missing year fix
+            if not do_missing_year_fix:
+                if day > 366:
+                    writer.writerow([tail, date, hours])
+            else:
+                writer.writerow([tail, date, hours])
 
 if False:
     with open(input_file, 'r') as input_fp:
