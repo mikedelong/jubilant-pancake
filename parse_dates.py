@@ -12,7 +12,8 @@ input_file = settings['input_file']
 count = 0
 with open('./output/clean.csv', 'w') as output_fp:
     writer = csv.writer(output_fp)
-    writer.writerow(['tail', 'date', 'hours'])
+    headings = [settings['heading_one'], settings['heading_two'], settings['heading_three']]
+    writer.writerow(headings)
     with open(input_file, 'r') as input_fp:
         reader = csv.reader(input_fp)
         # skip the header row
