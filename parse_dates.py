@@ -2,17 +2,34 @@ import collections
 import csv
 import datetime
 import json
+import logging
+
+# set up logging
+formatter = logging.Formatter('%(asctime)s : %(name)s :: %(levelname)s : %(message)s')
+logger = logging.getLogger('main')
+logger.setLevel(logging.DEBUG)
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
+console_handler.setLevel(logging.DEBUG)
+logger.debug('started')
+
 
 # read the input filename from a JSON file
-with open('./settings.json', 'r') as settings_fp:
+settings_file = './settings.json'
+logger.debug('settings file : %s' % settings_file)
+with open(settings_file, 'r') as settings_fp:
     settings = json.load(settings_fp)
 
+logger.debug('settings: %s' % settings)
 input_file = settings['input_file']
+logger.debug('input file: %s' % input_file)
 
 count = 0
 with open('./output/clean.csv', 'w') as output_fp:
     writer = csv.writer(output_fp)
     headings = [settings['heading_one'], settings['heading_two'], settings['heading_three']]
+    logger.debug('headings: %s' % headings)
     writer.writerow(headings)
     with open(input_file, 'r') as input_fp:
         reader = csv.reader(input_fp)
@@ -23,6 +40,10 @@ with open('./output/clean.csv', 'w') as output_fp:
             if count % 10000 == 0:
                 print(('%d : %s') % (count, row))
             tail = row[0].strip()
+            if len(tail) != 10:
+                logger.warning('troublesome %s: %s' % (headings[0], tail))
+
+
             day = int(row[2])
             hours = float(row[3])
             if day > 366:
