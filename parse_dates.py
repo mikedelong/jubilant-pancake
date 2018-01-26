@@ -26,7 +26,7 @@ input_file = settings['input_file']
 logger.debug('input file: %s' % input_file)
 
 count = 0
-with open('./output/clean.csv', 'w') as output_fp:
+with open('./output/clean.csv', 'w', newline='') as output_fp:
     writer = csv.writer(output_fp)
     headings = [settings['heading_one'], settings['heading_two'], settings['heading_three']]
     logger.debug('headings: %s' % headings)
@@ -42,6 +42,7 @@ with open('./output/clean.csv', 'w') as output_fp:
             tail = row[0].strip()
             if len(tail) != 10:
                 logger.warning('troublesome %s: %s' % (headings[0], tail))
+            tail = '-'.join([tail[0:2], tail[-4:]])
 
 
             day = int(row[2])
