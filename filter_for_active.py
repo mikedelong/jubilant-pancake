@@ -1,3 +1,5 @@
+import csv
+import datetime
 import json
 import logging
 
@@ -12,7 +14,6 @@ console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 console_handler.setLevel(logging.DEBUG)
 logger.debug('started')
-
 
 # read the input filename from a JSON file
 settings_file = './settings.json'
@@ -37,3 +38,48 @@ logger.debug(active.values)
 # now let's load the big input file
 input_file = settings['input_file']
 logger.debug('input file: %s' % input_file)
+
+do_missing_year_fix = False
+count = 0
+output_folder = settings['output_folder']
+
+if do_missing_year_fix:
+    output_file = './output/clean.csv'
+else:
+    output_file = './output/clean-no-2000-fix.csv'
+
+with open(output_file, 'w', newline='') as output_fp:
+    writer = csv.writer(output_fp)
+    headings = [settings['heading_one'], settings['heading_two'], settings['heading_three']]
+    logger.debug('headings: %s' % headings)
+    writer.writerow(headings)
+    with open(input_file, 'r') as input_fp:
+        reader = csv.reader(input_fp)
+        # skip the header row
+        next(reader)
+        for row in reader:
+            count += 1
+            if count % 10000 == 0:
+                print(('%d : %s') % (count, row))
+            tail = row[0].strip()
+            if len(tail) != 10:
+                logger.warning('troublesome %s: %s' % (headings[0], tail))
+            tail = '-'.join([tail[0:2], tail[-4:]])
+
+            day = int(row[2])
+            hours = float(row[3])
+            if day > 366:
+                date_day = int(row[2][-3:])
+                date_year = int(row[2][0:-3])
+                year = 1900 + date_year if date_year > 50 else 2000 + date_year
+                date = datetime.date(year, 1, 1) + datetime.timedelta(days=date_day)
+            else:
+                date_day = int(row[2])
+                date = datetime.date(2000, 1, 1) + datetime.timedelta(days=date_day)
+
+            # only always write if we're doing the missing year fix
+            if not do_missing_year_fix:
+                if day > 366:
+                    writer.writerow([tail, date, hours])
+            else:
+                writer.writerow([tail, date, hours])
