@@ -2,9 +2,11 @@ import csv
 import datetime
 import json
 import logging
+import time
 
 import pandas as pd
 
+start_time = time.time()
 # set up logging
 formatter = logging.Formatter('%(asctime)s : %(name)s :: %(levelname)s : %(message)s')
 logger = logging.getLogger('main')
@@ -97,3 +99,8 @@ with open(output_file, 'w', newline='') as output_fp:
                     write_count += 1
 
 logger.debug('read %d rows, wrote %d rows' % (read_count, write_count))
+logger.debug('done')
+finish_time = time.time()
+elapsed_hours, elapsed_remainder = divmod(finish_time - start_time, 3600)
+elapsed_minutes, elapsed_seconds = divmod(elapsed_remainder, 60)
+logger.info("Time: {:0>2}:{:0>2}:{:05.2f}".format(int(elapsed_hours), int(elapsed_minutes), elapsed_seconds))
