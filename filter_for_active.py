@@ -56,6 +56,7 @@ else:
 
 progress_logging_frequency = int(settings['progress_logging_frequency'])
 read_count = 0
+write_count = 0
 with open(output_file, 'w', newline='') as output_fp:
     writer = csv.writer(output_fp)
     headings = [settings['heading_one'], settings['heading_two'], settings['heading_three']]
@@ -90,7 +91,9 @@ with open(output_file, 'w', newline='') as output_fp:
                 if not do_missing_year_fix:
                     if day > 366:
                         writer.writerow([tail, date, hours])
+                        write_count += 1
                 else:
                     writer.writerow([tail, date, hours])
+                    write_count += 1
 
-logger.debug('read %d rows' % read_count)
+logger.debug('read %d rows, wrote %d rows' % (read_count, write_count))
