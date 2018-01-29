@@ -44,6 +44,7 @@ with open(output_file, 'w', newline='') as output_fp:
         next(reader)
         for row in reader:
             count += 1
+            # todo move this frequency to a setting
             if count % 10000 == 0:
                 logger.debug('%d : %s' % (count, row))
             tail = row[0].strip()
