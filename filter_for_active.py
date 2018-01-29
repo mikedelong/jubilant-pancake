@@ -34,6 +34,7 @@ filter_data = pd.read_excel(filter_file, sheet_name=filter_sheet_name, converter
 logger.debug(filter_data.head())
 active = filter_data[filter_column]
 logger.debug(active.values)
+active_values = set(active.values)
 
 # now let's load the big input file
 input_file = settings['input_file']
@@ -44,9 +45,11 @@ count = 0
 output_folder = settings['output_folder']
 
 if do_missing_year_fix:
-    output_file = output_folder + 'clean.csv'
+    # todo move filename to settings
+    output_file = output_folder + 'filtered.csv'
 else:
-    output_file = output_folder + 'clean-no-2000-fix.csv'
+    # todo move filename to settings
+    output_file = output_folder + 'filtered-no-missing-date.csv'
 
 with open(output_file, 'w', newline='') as output_fp:
     writer = csv.writer(output_fp)
@@ -59,27 +62,29 @@ with open(output_file, 'w', newline='') as output_fp:
         next(reader)
         for row in reader:
             count += 1
+            # todo move frequency to setting
             if count % 10000 == 0:
-                print(('%d : %s') % (count, row))
+                logger.debug('%d : %s' % (count, row))
             tail = row[0].strip()
             if len(tail) != 10:
                 logger.warning('troublesome %s: %s' % (headings[0], tail))
-            tail = '-'.join([tail[0:2], tail[-4:]])
 
-            day = int(row[2])
-            hours = float(row[3])
-            if day > 366:
-                date_day = int(row[2][-3:])
-                date_year = int(row[2][0:-3])
-                year = 1900 + date_year if date_year > 50 else 2000 + date_year
-                date = datetime.date(year, 1, 1) + datetime.timedelta(days=date_day)
-            else:
-                date_day = int(row[2])
-                date = datetime.date(2000, 1, 1) + datetime.timedelta(days=date_day)
-
-            # only always write if we're doing the missing year fix
-            if not do_missing_year_fix:
+            if tail in active_values:
+                tail = '-'.join([tail[0:2], tail[-4:]])
+                day = int(row[2])
+                hours = float(row[3])
                 if day > 366:
+                    date_day = int(row[2][-3:])
+                    date_year = int(row[2][0:-3])
+                    year = 1900 + date_year if date_year > 50 else 2000 + date_year
+                    date = datetime.date(year, 1, 1) + datetime.timedelta(days=date_day)
+                else:
+                    date_day = int(row[2])
+                    date = datetime.date(2000, 1, 1) + datetime.timedelta(days=date_day)
+
+                # only always write if we're doing the missing year fix
+                if not do_missing_year_fix:
+                    if day > 366:
+                        writer.writerow([tail, date, hours])
+                else:
                     writer.writerow([tail, date, hours])
-            else:
-                writer.writerow([tail, date, hours])
