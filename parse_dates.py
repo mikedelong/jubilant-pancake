@@ -27,8 +27,10 @@ logger.debug('input file: %s' % input_file)
 do_missing_year_fix = False
 count = 0
 if do_missing_year_fix:
+    # todo move filename to settings
     output_file = './output/clean.csv'
 else:
+    # todo move filename to settings
     output_file = './output/clean-no-2000-fix.csv'
 
 with open(output_file, 'w', newline='') as output_fp:
