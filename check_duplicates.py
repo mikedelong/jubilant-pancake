@@ -38,6 +38,13 @@ data.drop(column_to_drop, axis=1, inplace=True)
 
 # how many columns do we have before dropping?
 logger.debug('before dropping duplicates we have shape %s ' % str(data.shape))
+count_before = data.shape[0]
+
+data.drop_duplicates(keep='first', inplace=True)
+logger.debug('after dropping duplicates we have shape %s ' % str(data.shape))
+count_after = data.shape[0]
+
+logger.debug('this means we have %d duplicate rows' % (count_before - count_after))
 
 logger.debug('done')
 finish_time = time.time()
