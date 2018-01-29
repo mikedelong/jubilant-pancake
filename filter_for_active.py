@@ -44,9 +44,9 @@ count = 0
 output_folder = settings['output_folder']
 
 if do_missing_year_fix:
-    output_file = './output/clean.csv'
+    output_file = output_folder + 'clean.csv'
 else:
-    output_file = './output/clean-no-2000-fix.csv'
+    output_file = output_folder + 'clean-no-2000-fix.csv'
 
 with open(output_file, 'w', newline='') as output_fp:
     writer = csv.writer(output_fp)
