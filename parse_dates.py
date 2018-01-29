@@ -14,7 +14,6 @@ logger.addHandler(console_handler)
 console_handler.setLevel(logging.DEBUG)
 logger.debug('started')
 
-
 # read the input filename from a JSON file
 settings_file = './settings.json'
 logger.debug('settings file : %s' % settings_file)
@@ -49,7 +48,6 @@ with open(output_file, 'w', newline='') as output_fp:
             if len(tail) != 10:
                 logger.warning('troublesome %s: %s' % (headings[0], tail))
             tail = '-'.join([tail[0:2], tail[-4:]])
-
 
             day = int(row[2])
             hours = float(row[3])
