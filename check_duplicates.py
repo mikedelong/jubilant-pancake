@@ -2,6 +2,8 @@ import json
 import logging
 import time
 
+import pandas as pd
+
 start_time = time.time()
 # set up logging
 formatter = logging.Formatter('%(asctime)s : %(name)s :: %(levelname)s : %(message)s')
@@ -20,6 +22,22 @@ with open(settings_file, 'r') as settings_fp:
     settings = json.load(settings_fp)
 
 logger.debug('settings: %s' % settings)
+
+# read the input file into a data frame
+# now let's load the big input file
+input_file = settings['input_file']
+logger.debug('input file: %s' % input_file)
+
+data = pd.read_csv(input_file)
+logger.debug('input file read complete.')
+
+# we want to remove the second column because it doesn't tell us anything
+column_to_drop = data.columns[1]
+logger.debug('before looing for duplicates we are going to drop column %s' % column_to_drop)
+data.drop(column_to_drop, axis=1, inplace=True)
+
+# how many columns do we have before dropping?
+logger.debug('before dropping duplicates we have shape %s ' % str(data.shape))
 
 logger.debug('done')
 finish_time = time.time()
