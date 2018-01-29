@@ -40,8 +40,11 @@ active_values = set(active.values)
 input_file = settings['input_file']
 logger.debug('input file: %s' % input_file)
 
-do_missing_year_fix = False
-count = 0
+do_missing_year_fix = bool(settings['do_missing_year_fix'])
+if do_missing_year_fix:
+    logger.debug('we are moving data with no year field to the year 2000')
+else:
+    logger.debug('we are dropping data with no year field')
 output_folder = settings['output_folder']
 
 if do_missing_year_fix:
@@ -51,6 +54,8 @@ else:
     # todo move filename to settings
     output_file = output_folder + 'filtered-no-missing-date.csv'
 
+progress_logging_frequency = int(settings['progress_logging_frequency'])
+read_count = 0
 with open(output_file, 'w', newline='') as output_fp:
     writer = csv.writer(output_fp)
     headings = [settings['heading_one'], settings['heading_two'], settings['heading_three']]
@@ -61,10 +66,9 @@ with open(output_file, 'w', newline='') as output_fp:
         # skip the header row
         next(reader)
         for row in reader:
-            count += 1
-            # todo move frequency to setting
-            if count % 10000 == 0:
-                logger.debug('%d : %s' % (count, row))
+            read_count += 1
+            if read_count % progress_logging_frequency == 0:
+                logger.debug('%d : %s' % (read_count, row))
             tail = row[0].strip()
             if len(tail) != 10:
                 logger.warning('troublesome %s: %s' % (headings[0], tail))
@@ -88,3 +92,5 @@ with open(output_file, 'w', newline='') as output_fp:
                         writer.writerow([tail, date, hours])
                 else:
                     writer.writerow([tail, date, hours])
+
+logger.debug('read %d rows' % read_count)
