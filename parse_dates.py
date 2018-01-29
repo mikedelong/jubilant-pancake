@@ -43,7 +43,7 @@ with open(output_file, 'w', newline='') as output_fp:
         for row in reader:
             count += 1
             if count % 10000 == 0:
-                print(('%d : %s') % (count, row))
+                print('%d : %s' % (count, row))
             tail = row[0].strip()
             if len(tail) != 10:
                 logger.warning('troublesome %s: %s' % (headings[0], tail))
