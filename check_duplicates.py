@@ -38,6 +38,19 @@ with open(settings_file, 'r') as settings_fp:
 
 logger.debug('settings: %s' % settings)
 
+# let's do everything to get our filter data before we load anything else
+filter_file = settings['filter_file']
+logger.debug('filter file: %s' % filter_file)
+filter_sheet_name = settings['filter_sheet_name']
+logger.debug('filter sheet name: %s' % filter_sheet_name)
+filter_column = settings['filter_column']
+converters = {filter_column: str}
+filter_data = pd.read_excel(filter_file, sheet_name=filter_sheet_name, converters=converters)
+logger.debug(filter_data.head())
+active = filter_data[filter_column]
+logger.debug(active.values)
+active_values = set(active.values)
+
 # read the input file into a data frame
 # now let's load the big input file
 input_file = settings['input_file']
@@ -61,8 +74,13 @@ logger.debug('before looking for duplicates we are going to drop column %s' % co
 data.drop(column_to_drop, axis=1, inplace=True)
 
 # how many columns do we have before dropping?
-logger.debug('before dropping duplicates we have shape %s ' % str(data.shape))
-count_before = data.shape[0]
+logger.debug('before dropping not-actives we have shape %s ' % str(data.shape))
+
+# drop all the tails that are not in the active set
+data[input_heading_one] = np.vectorize(str.strip)(data[input_heading_one])
+# data.drop(data[data[input_heading_one] not in active_values].index, inplace=True)
+data = data[data[input_heading_one].isin(active_values)]
+logger.debug('after dropping not-actives we have shape %s ' % str(data.shape))
 
 do_drop_duplicates = False
 if do_drop_duplicates:
@@ -70,7 +88,7 @@ if do_drop_duplicates:
     logger.debug('after dropping duplicates we have shape %s ' % str(data.shape))
     count_after = data.shape[0]
 
-    logger.debug('this means we have %d duplicate rows' % (count_before - count_after))
+    # logger.debug('this means we have %d duplicate rows' % (count_before - count_after))
 
 # now remove the rows where the date is zero
 data.drop(data[data[input_heading_two] == '0'].index, inplace=True)
@@ -81,7 +99,6 @@ data['date'] = np.vectorize(make_date)((data[date_column].astype(int) / 1000).as
                                        (data[date_column].astype(int) % 1000).astype(int))
 
 # fix the tail
-logger.debug(input_heading_one)
 data['tail'] = np.vectorize(make_tail)(data[input_heading_one])
 
 logger.debug(data.head())
