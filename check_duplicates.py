@@ -59,8 +59,6 @@ data.drop(column_to_drop, axis=1, inplace=True)
 logger.debug('before dropping duplicates we have shape %s ' % str(data.shape))
 count_before = data.shape[0]
 
-logger.debug('input heading two is %s' % input_heading_two)
-logger.debug('date column is %s' % date_column)
 do_drop_duplicates = False
 if do_drop_duplicates:
     data.drop_duplicates(keep='first', inplace=True)
@@ -78,6 +76,11 @@ data['date'] = np.vectorize(make_date)((data[date_column].astype(int) / 1000).as
                                        (data[date_column].astype(int) % 1000).astype(int))
 
 logger.debug(data.head())
+
+output_folder = settings['output_folder']
+output_file = output_folder + 'nozeros.csv'
+logger.debug('writing output to %s' % output_file)
+data.to_csv(output_file)
 
 logger.debug('done')
 finish_time = time.time()
