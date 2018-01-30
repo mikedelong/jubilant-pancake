@@ -59,22 +59,23 @@ data.drop(column_to_drop, axis=1, inplace=True)
 logger.debug('before dropping duplicates we have shape %s ' % str(data.shape))
 count_before = data.shape[0]
 
-data.drop_duplicates(keep='first', inplace=True)
-logger.debug('after dropping duplicates we have shape %s ' % str(data.shape))
-count_after = data.shape[0]
+logger.debug('input heading two is %s' % input_heading_two)
+logger.debug('date column is %s' % date_column)
+do_drop_duplicates = False
+if do_drop_duplicates:
+    data.drop_duplicates(keep='first', inplace=True)
+    logger.debug('after dropping duplicates we have shape %s ' % str(data.shape))
+    count_after = data.shape[0]
 
-logger.debug('this means we have %d duplicate rows' % (count_before - count_after))
+    logger.debug('this means we have %d duplicate rows' % (count_before - count_after))
 
-# add the day-of-year column
-data['year'] = (data[date_column].astype(int) / 1000).astype(int)
-logger.debug('after adding the day of the year we have shape %s' % str(data.shape))
-logger.debug('after adding the day of the year our columns are %s' % data.columns.values)
-
-# add the two-digit year column
-data['dayOfYear'] = (data[date_column].astype(int) % 1000).astype(int)
+# now remove the rows where the date is zero
+data.drop(data[data[input_heading_two] == '0'].index, inplace=True)
+logger.debug('after dropping zero dates we have shape %s ' % str(data.shape))
 
 # now add the date column
-data['date'] = np.vectorize(make_date)(data['year'], data['dayOfYear'])
+data['date'] = np.vectorize(make_date)((data[date_column].astype(int) / 1000).astype(int),
+                                       (data[date_column].astype(int) % 1000).astype(int))
 
 logger.debug(data.head())
 
