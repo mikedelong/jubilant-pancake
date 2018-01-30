@@ -56,6 +56,7 @@ logger.debug('input file read complete.')
 data_columns = data.columns
 logger.debug('our big data frame has column headers %s' % data.columns)
 
+# todo reconcile this with the fact that our headings are data instead of code now
 column_to_drop = data.columns[1]
 date_column = data.columns[2]  # note that this is before we drop the column above
 logger.debug('before looking for duplicates we are going to drop column %s' % column_to_drop)
@@ -72,9 +73,10 @@ count_after = data.shape[0]
 logger.debug('this means we have %d duplicate rows' % (count_before - count_after))
 
 # add the day-of-year column
-data['dayOfYear'] = data[date_column].astype(int)
+data['dayOfYear'] = (data[date_column].astype(int) / 100).astype(int)
 logger.debug('after adding the day of the year we have shape %s' % str(data.shape))
 logger.debug('after adding the day of the year our columns are %s' % data.columns.values)
+logger.debug(data.head())
 # now add the date column
 
 logger.debug('done')
