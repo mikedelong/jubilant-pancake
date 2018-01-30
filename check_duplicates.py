@@ -3,23 +3,16 @@ import json
 import logging
 import time
 
+import numpy as np
 import pandas as pd
 
 start_time = time.time()
 
 
-def make_date(arg_date):
-    day = int(arg_date)
-    if day > 366:
-        date_day = int(arg_date[-3:])
-        date_year = int(arg_date[0:-3])
-        year = 1900 + date_year if date_year > 50 else 2000 + date_year
-        date = datetime.date(year, 1, 1) + datetime.timedelta(days=date_day)
-    else:
-        date_day = int(arg_date)
-        date = datetime.date(2000, 1, 1) + datetime.timedelta(days=date_day)
-
-    return date
+def make_date(arg_year, arg_day):
+    year = 1900 + arg_year if arg_year > 50 else 2000 + arg_year
+    result = datetime.date(year, 1, 1) + datetime.timedelta(days=int(arg_day))
+    return result
 
 
 # set up logging
@@ -73,11 +66,17 @@ count_after = data.shape[0]
 logger.debug('this means we have %d duplicate rows' % (count_before - count_after))
 
 # add the day-of-year column
-data['dayOfYear'] = (data[date_column].astype(int) / 100).astype(int)
+data['year'] = (data[date_column].astype(int) / 1000).astype(int)
 logger.debug('after adding the day of the year we have shape %s' % str(data.shape))
 logger.debug('after adding the day of the year our columns are %s' % data.columns.values)
-logger.debug(data.head())
+
+# add the two-digit year column
+data['dayOfYear'] = (data[date_column].astype(int) % 1000).astype(int)
+
 # now add the date column
+data['date'] = np.vectorize(make_date)(data['year'], data['dayOfYear'])
+
+logger.debug(data.head())
 
 logger.debug('done')
 finish_time = time.time()
