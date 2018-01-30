@@ -45,7 +45,10 @@ logger.debug('settings: %s' % settings)
 input_file = settings['input_file']
 logger.debug('input file: %s' % input_file)
 
-converters = {'serial_number': str, 'SORTIE_DATE': str, 'HOURS': float}
+input_heading_one = settings['input_heading_one']
+input_heading_two = settings['input_heading_two']
+input_heading_three = settings['input_heading_three']
+converters = {input_heading_one: str, input_heading_two: str, input_heading_three: float}
 data = pd.read_csv(input_file, converters=converters)
 logger.debug('input file read complete.')
 
@@ -71,7 +74,7 @@ logger.debug('this means we have %d duplicate rows' % (count_before - count_afte
 # add the day-of-year column
 data['dayOfYear'] = data[date_column].astype(int)
 logger.debug('after adding the day of the year we have shape %s' % str(data.shape))
-logger.debug('after adding the day of the year our columns are %s' % data.columns)
+logger.debug('after adding the day of the year our columns are %s' % data.columns.values)
 # now add the date column
 
 logger.debug('done')
