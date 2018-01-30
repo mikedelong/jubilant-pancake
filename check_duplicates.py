@@ -15,6 +15,11 @@ def make_date(arg_year, arg_day):
     return result
 
 
+def make_tail(arg_serial):
+    arg_serial = arg_serial.strip()
+    result = '-'.join([arg_serial[0:2], arg_serial[-4:]])
+    return result
+
 # set up logging
 formatter = logging.Formatter('%(asctime)s : %(name)s :: %(levelname)s : %(message)s')
 logger = logging.getLogger('main')
@@ -75,12 +80,16 @@ logger.debug('after dropping zero dates we have shape %s ' % str(data.shape))
 data['date'] = np.vectorize(make_date)((data[date_column].astype(int) / 1000).astype(int),
                                        (data[date_column].astype(int) % 1000).astype(int))
 
+# fix the tail
+logger.debug(input_heading_one)
+data['tail'] = np.vectorize(make_tail)(data[input_heading_one])
+
 logger.debug(data.head())
 
 output_folder = settings['output_folder']
 output_file = output_folder + 'nozeros.csv'
 logger.debug('writing output to %s' % output_file)
-data.to_csv(output_file)
+data.to_csv(output_file, columns=['tail', 'date', input_heading_three])
 
 logger.debug('done')
 finish_time = time.time()
