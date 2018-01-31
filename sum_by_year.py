@@ -25,4 +25,10 @@ logger.debug('reading input data from %s' % full_input_file)
 data = pd.read_csv(full_input_file)
 logger.debug('data read complete.')
 logger.debug(data.columns)
-logger.debug(data.head(20))
+logger.debug(data.head(5))
+
+t0 = data[data['tail'] == '00-0218']
+
+logger.debug(t0.shape)
+logger.debug(t0)
+# t1 = t0.groupby('date')
