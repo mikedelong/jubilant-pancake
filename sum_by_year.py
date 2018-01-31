@@ -24,4 +24,5 @@ full_input_file = input_folder + input_file
 logger.debug('reading input data from %s' % full_input_file)
 data = pd.read_csv(full_input_file)
 logger.debug('data read complete.')
+logger.debug(data.columns)
 logger.debug(data.head(20))
