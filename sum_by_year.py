@@ -22,13 +22,11 @@ input_file = 'nozeros.csv'
 full_input_file = input_folder + input_file
 
 logger.debug('reading input data from %s' % full_input_file)
-data = pd.read_csv(full_input_file)
+data = pd.read_csv(full_input_file, parse_dates=['date'])
 logger.debug('data read complete.')
 logger.debug(data.columns)
 logger.debug(data.head(5))
+t0 = data[data[data.columns[0]] == data[data.columns[0]][0]]
 
-t0 = data[data['tail'] == '00-0218']
-
-logger.debug(t0.shape)
-logger.debug(t0)
-# t1 = t0.groupby('date')
+t1 = t0.groupby(t0.date.dt.year).sum()
+logger.debug(t1)
