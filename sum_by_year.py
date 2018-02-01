@@ -40,6 +40,12 @@ logger.debug(data.head(5))
 annual = data.groupby([data.columns[0], data.date.dt.year]).sum()
 annual.to_csv(settings['output_folder'] + 'annual.csv')
 
+annual_cumulative = data.groupby([data.columns[0], data.date.dt.year]).cumsum()
+annual_cumulative.to_csv(settings['output_folder'] + 'annual-cumulative.csv')
+
 # roll up all monthly data
 monthly = data.groupby([data.columns[0], data.date.dt.month]).sum()
 monthly.to_csv(settings['output_folder'] + 'monthly.csv')
+
+monthly_cumulative = data.groupby([data.columns[0], data.date.dt.month]).cumsum()
+monthly_cumulative.to_csv(settings['output_folder'] + 'monthly-cumulative.csv')
