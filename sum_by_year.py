@@ -35,7 +35,11 @@ data = pd.read_csv(full_input_file, parse_dates=['date'])
 logger.debug('data read complete.')
 logger.debug(data.columns)
 logger.debug(data.head(5))
-t0 = data[data[data.columns[0]] == data[data.columns[0]][0]]
 
-t1 = t0.groupby(t0.date.dt.year).sum()
-logger.debug(t1)
+# roll up all annual data
+annual = data.groupby([data.columns[0], data.date.dt.year]).sum()
+annual.to_csv(settings['output_folder'] + 'annual.csv')
+
+# roll up all monthly data
+monthly = data.groupby([data.columns[0], data.date.dt.month]).sum()
+monthly.to_csv(settings['output_folder'] + 'monthly.csv')
