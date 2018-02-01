@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 
@@ -15,8 +16,16 @@ logger.addHandler(console_handler)
 console_handler.setLevel(logging.DEBUG)
 logger.debug('started')
 
+# read the input filename from a JSON file
+settings_file = './settings.json'
+logger.debug('settings file : %s' % settings_file)
+with open(settings_file, 'r') as settings_fp:
+    settings = json.load(settings_fp)
+
+logger.debug('settings: %s' % settings)
+
 # todo fix these
-input_folder = './output/'
+input_folder = settings['output_folder']
 input_file = 'nozeros.csv'
 
 full_input_file = input_folder + input_file
