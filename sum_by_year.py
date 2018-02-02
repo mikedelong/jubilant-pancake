@@ -33,9 +33,10 @@ full_input_file = input_folder + input_file
 logger.debug('reading input data from %s' % full_input_file)
 data = pd.read_csv(full_input_file, parse_dates=['date'], index_col=['tail'])
 logger.debug('data read complete.')
-logger.debug(data.columns.values)
+logger.debug('our data columns are %s and %s' % (data.columns.values[0], data.columns.values[1]))
 logger.debug(data.head(5))
 
+data = data.sort_values(['date'], ascending=[True])
 # roll up all annual data
 annual = data.groupby(['tail', data.date.dt.year]).sum()
 logger.debug(annual.head(5))
@@ -43,5 +44,6 @@ annual.to_csv(settings['output_folder'] + 'annual.csv')
 
 # roll up all monthly data
 monthly = data.groupby(['tail', data.date.dt.year, data.date.dt.month]).sum()
+# todo rename the columns here
 logger.debug(monthly.head(5))
 monthly.to_csv(settings['output_folder'] + 'monthly.csv')
