@@ -44,6 +44,6 @@ annual.to_csv(settings['output_folder'] + 'annual.csv')
 
 # roll up all monthly data
 monthly = data.groupby(['tail', data.date.dt.year, data.date.dt.month]).sum()
-# todo rename the columns here
+monthly.index.names = ['tail', 'year', 'month']
 logger.debug(monthly.head(5))
 monthly.to_csv(settings['output_folder'] + 'monthly.csv')
