@@ -1,10 +1,20 @@
 # https://machinelearningmastery.com/arima-for-time-series-forecasting-with-python/
 
+import datetime
 import json
 import logging
 import time
 
+import numpy as np
+import pandas as pd
+import pandas.tseries.offsets as offsets
+
 start_time = time.time()
+
+
+def make_date(arg_year, arg_month):
+    result = pd.to_datetime(datetime.date(arg_year, arg_month, 1) + offsets.MonthEnd(0))
+    return result
 
 # set up logging
 formatter = logging.Formatter('%(asctime)s : %(name)s :: %(levelname)s : %(message)s')
@@ -24,8 +34,12 @@ with open(settings_file, 'r') as settings_fp:
 
 logger.debug('settings: %s' % settings)
 
-# todo work goes here
-
+input_folder = settings['processed_folder']
+full_input_file = input_folder + 'monthly.csv'
+logger.debug('reading input data from %s' % full_input_file)
+data = pd.read_csv(full_input_file, index_col=['tail'])
+data['date'] = np.vectorize(make_date)(data['year'].astype(int), data['month'].astype(int))
+logger.debug(data.head(5))
 
 logger.debug('done')
 finish_time = time.time()
