@@ -40,10 +40,10 @@ data = data.sort_values(['date'], ascending=[True])
 # roll up all annual data
 annual = data.groupby(['tail', data.date.dt.year]).sum()
 logger.debug(annual.head(5))
-annual.to_csv(settings['output_folder'] + 'annual.csv')
+annual.to_csv(settings['processed_folder'] + 'annual.csv')
 
 # roll up all monthly data
 monthly = data.groupby(['tail', data.date.dt.year, data.date.dt.month]).sum()
 monthly.index.names = ['tail', 'year', 'month']
 logger.debug(monthly.head(5))
-monthly.to_csv(settings['output_folder'] + 'monthly.csv')
+monthly.to_csv(settings['processed_folder'] + 'monthly.csv')
