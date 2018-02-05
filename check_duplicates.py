@@ -20,6 +20,7 @@ def make_tail(arg_serial):
     result = '-'.join([arg_serial[0:2], arg_serial[-4:]])
     return result
 
+
 # set up logging
 formatter = logging.Formatter('%(asctime)s : %(name)s :: %(levelname)s : %(message)s')
 logger = logging.getLogger('main')
@@ -87,8 +88,6 @@ if do_drop_duplicates:
     data.drop_duplicates(keep='first', inplace=True)
     logger.debug('after dropping duplicates we have shape %s ' % str(data.shape))
     count_after = data.shape[0]
-
-    # logger.debug('this means we have %d duplicate rows' % (count_before - count_after))
 
 # now remove the rows where the date is zero
 data.drop(data[data[input_heading_two] == '0'].index, inplace=True)
