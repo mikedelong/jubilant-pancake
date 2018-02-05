@@ -83,12 +83,6 @@ data[input_heading_one] = np.vectorize(str.strip)(data[input_heading_one])
 data = data[data[input_heading_one].isin(active_values)]
 logger.debug('after dropping not-actives we have shape %s ' % str(data.shape))
 
-do_drop_duplicates = False
-if do_drop_duplicates:
-    data.drop_duplicates(keep='first', inplace=True)
-    logger.debug('after dropping duplicates we have shape %s ' % str(data.shape))
-    count_after = data.shape[0]
-
 # now remove the rows where the date is zero
 data.drop(data[data[input_heading_two] == '0'].index, inplace=True)
 logger.debug('after dropping zero dates we have shape %s ' % str(data.shape))
