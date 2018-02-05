@@ -24,8 +24,8 @@ with open(settings_file, 'r') as settings_fp:
 
 logger.debug('settings: %s' % settings)
 
-# todo fix these
-input_folder = settings['output_folder']
+input_folder = settings['processed_folder']
+# todo fix this
 input_file = 'nozeros.csv'
 
 full_input_file = input_folder + input_file
