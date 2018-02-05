@@ -5,11 +5,12 @@ import json
 import logging
 import time
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pandas.tseries.offsets as offsets
-from matplotlib import pyplot
 from pandas.plotting import autocorrelation_plot
+from statsmodels.tsa.arima_model import ARIMA
 
 start_time = time.time()
 
@@ -54,10 +55,24 @@ data.drop(['tail', 'year', 'month'], axis=1, inplace=True)
 logger.debug('after dropping columns we have shape %s ' % str(data.shape))
 logger.debug(data.head(5))
 
-t0 = data.groupby(['date'], axis=0).sum()
+fleet_monthly = data.groupby(['date'], axis=0).sum()
 
-autocorrelation_plot(t0)
-pyplot.show()
+fig, axes = plt.subplots(nrows=3)
+
+autocorrelation_plot(fleet_monthly, ax=axes[0])
+
+model = ARIMA(fleet_monthly, order=(12, 1, 0))
+model_fit = model.fit(disp=0)
+logger.debug(model_fit.summary())
+
+residuals = pd.DataFrame(model_fit.resid)
+residuals.plot(ax=axes[1])
+residuals.plot(kind='kde', ax=axes[2])
+autocorrelation_plot_file = settings['output_folder'] + 'autocorrelation_plot.png'
+logger.debug(residuals.describe())
+
+logger.debug('saving ARIMA plots to %s', autocorrelation_plot_file)
+plt.savefig(autocorrelation_plot_file)
 
 logger.debug('done')
 finish_time = time.time()
