@@ -102,7 +102,7 @@ data['tail'] = np.vectorize(make_tail)(data[input_heading_one])
 
 logger.debug(data.head())
 
-output_folder = settings['output_folder']
+output_folder = settings['processed_folder']
 output_file = output_folder + 'nozeros.csv'
 logger.debug('writing output to %s' % output_file)
 data.to_csv(output_file, columns=['tail', 'date', input_heading_three], index=False)
