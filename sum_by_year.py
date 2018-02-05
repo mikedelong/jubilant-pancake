@@ -47,3 +47,9 @@ monthly = data.groupby(['tail', data.date.dt.year, data.date.dt.month]).sum()
 monthly.index.names = ['tail', 'year', 'month']
 logger.debug(monthly.head(5))
 monthly.to_csv(settings['processed_folder'] + 'monthly.csv')
+
+logger.debug('done')
+finish_time = time.time()
+elapsed_hours, elapsed_remainder = divmod(finish_time - start_time, 3600)
+elapsed_minutes, elapsed_seconds = divmod(elapsed_remainder, 60)
+logger.info("Time: {:0>2}:{:0>2}:{:05.2f}".format(int(elapsed_hours), int(elapsed_minutes), elapsed_seconds))
