@@ -38,6 +38,12 @@ input_folder = settings['processed_folder']
 full_input_file = input_folder + 'monthly.csv'
 logger.debug('reading input data from %s' % full_input_file)
 data = pd.read_csv(full_input_file, index_col=['tail'])
+
+# now we want to discard anything before 2010 and after 2016
+data = data[data['year'].astype(int) >= 2010]
+data = data[data['year'].astype(int) <= 2016]
+
+# todo think about pushing this back into the upstream code
 data['date'] = np.vectorize(make_date)(data['year'].astype(int), data['month'].astype(int))
 logger.debug(data.head(5))
 
