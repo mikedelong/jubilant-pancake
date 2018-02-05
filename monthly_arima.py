@@ -8,6 +8,8 @@ import time
 import numpy as np
 import pandas as pd
 import pandas.tseries.offsets as offsets
+from matplotlib import pyplot
+from pandas.plotting import autocorrelation_plot
 
 start_time = time.time()
 
@@ -53,7 +55,9 @@ logger.debug('after dropping columns we have shape %s ' % str(data.shape))
 logger.debug(data.head(5))
 
 t0 = data.groupby(['date'], axis=0).sum()
-logger.debug(t0.head(5))
+
+autocorrelation_plot(t0)
+pyplot.show()
 
 logger.debug('done')
 finish_time = time.time()
