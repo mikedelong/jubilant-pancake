@@ -58,21 +58,22 @@ logger.debug(data.head(5))
 
 fleet_monthly = data.groupby(['date'], axis=0).sum()
 
-figure, axes = plt.subplots(nrows=3)
-autocorrelation_plot(fleet_monthly, ax=axes[0])
-model = ARIMA(fleet_monthly, order=(1, 1, 0))
-model_fit = model.fit(disp=0)
-logger.debug(model_fit.summary())
+for order_d in range(1, 2):
+    figure, axes = plt.subplots(nrows=3)
+    autocorrelation_plot(fleet_monthly, ax=axes[0])
+    model = ARIMA(fleet_monthly, order=(1, 1, 0))
+    model_fit = model.fit(disp=0)
+    logger.debug(model_fit.summary())
 
-residuals = pd.DataFrame(model_fit.resid)
-residuals.plot(ax=axes[1])
-residuals.plot(kind='kde', ax=axes[2])
-autocorrelation_plot_file = settings['output_folder'] + 'autocorrelation_plot.png'
-logger.debug(residuals.describe())
+    residuals = pd.DataFrame(model_fit.resid)
+    residuals.plot(ax=axes[1])
+    residuals.plot(kind='kde', ax=axes[2])
+    logger.debug(residuals.describe())
 
-logger.debug('saving ARIMA plots to %s', autocorrelation_plot_file)
-plt.savefig(autocorrelation_plot_file)
-del figure
+    autocorrelation_plot_file = '{}autocorrelation_plot_{}.png'.format(settings['output_folder'], order_d)
+    logger.debug('saving ARIMA plots to %s', autocorrelation_plot_file)
+    plt.savefig(autocorrelation_plot_file)
+    del figure
 
 logger.debug('done')
 finish_time = time.time()
