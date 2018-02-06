@@ -19,6 +19,7 @@ def make_date(arg_year, arg_month):
     result = pd.to_datetime(datetime.date(arg_year, arg_month, 1) + offsets.MonthEnd(0))
     return result
 
+
 # set up logging
 formatter = logging.Formatter('%(asctime)s : %(name)s :: %(levelname)s : %(message)s')
 logger = logging.getLogger('main')
@@ -57,11 +58,9 @@ logger.debug(data.head(5))
 
 fleet_monthly = data.groupby(['date'], axis=0).sum()
 
-fig, axes = plt.subplots(nrows=3)
-
+figure, axes = plt.subplots(nrows=3)
 autocorrelation_plot(fleet_monthly, ax=axes[0])
-
-model = ARIMA(fleet_monthly, order=(12, 1, 0))
+model = ARIMA(fleet_monthly, order=(1, 1, 0))
 model_fit = model.fit(disp=0)
 logger.debug(model_fit.summary())
 
@@ -73,6 +72,7 @@ logger.debug(residuals.describe())
 
 logger.debug('saving ARIMA plots to %s', autocorrelation_plot_file)
 plt.savefig(autocorrelation_plot_file)
+del figure
 
 logger.debug('done')
 finish_time = time.time()
