@@ -61,7 +61,7 @@ fleet_monthly = data.groupby(['date'], axis=0).sum()
 for order_d in range(1, 2):
     figure, axes = plt.subplots(nrows=3)
     autocorrelation_plot(fleet_monthly, ax=axes[0])
-    model = ARIMA(fleet_monthly, order=(1, 1, 0))
+    model = ARIMA(fleet_monthly, order=(order_d, 1, 0))
     model_fit = model.fit(disp=0)
     logger.debug(model_fit.summary())
 
