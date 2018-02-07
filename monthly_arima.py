@@ -84,6 +84,7 @@ for order_d in range(3, 4):
                                                                                residuals.max()))
     autocorrelation_plot_file = '{}autocorrelation_plot_{}.png'.format(settings['output_folder'], order_d)
     logger.debug('saving ARIMA plots to %s', autocorrelation_plot_file)
+    plt.tight_layout()
     plt.savefig(autocorrelation_plot_file)
     del figure
     # now let's forecast for 2017
