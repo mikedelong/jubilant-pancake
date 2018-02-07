@@ -54,7 +54,7 @@ logger.debug('after trimming to the date range of interest we have shape %s ' % 
 # to get just the data we want lets throw out the tail, month, and date
 data.drop(['tail', 'year', 'month'], axis=1, inplace=True)
 logger.debug('after dropping columns we have shape %s ' % str(data.shape))
-logger.debug(data.head(5))
+logger.debug(data.head(20))
 
 fleet_monthly = data.groupby(['date'], axis=0).sum()
 
@@ -64,16 +64,19 @@ for order_d in range(1, 2):
     model = ARIMA(fleet_monthly, order=(order_d, 1, 0))
     model_fit = model.fit(disp=0)
     logger.debug(model_fit.summary())
-
     residuals = pd.DataFrame(model_fit.resid)
     residuals.plot(ax=axes[1])
     residuals.plot(kind='kde', ax=axes[2])
     logger.debug(residuals.describe())
-
     autocorrelation_plot_file = '{}autocorrelation_plot_{}.png'.format(settings['output_folder'], order_d)
     logger.debug('saving ARIMA plots to %s', autocorrelation_plot_file)
     plt.savefig(autocorrelation_plot_file)
     del figure
+    # now let's forecast for 2017
+    forecasted = model_fit.forecast()
+    logger.debug('forecast values: %s' % str(forecasted))
+    predicted = model_fit.predict(start=84, end=84 + 12)
+    logger.debug('predicted values: %s' % str(predicted))
 
 logger.debug('done')
 finish_time = time.time()
