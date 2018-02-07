@@ -20,6 +20,12 @@ def make_date(arg_year, arg_month):
     return result
 
 
+def project_dates(arg_base, arg_count):
+    result = [pd.to_datetime(datetime.date(arg_base.year, arg_base.month, 1) + offsets.MonthEnd(month)) for month in
+              range(1, arg_count + 1)]
+    return result
+
+
 # set up logging
 formatter = logging.Formatter('%(asctime)s : %(name)s :: %(levelname)s : %(message)s')
 logger = logging.getLogger('main')
@@ -55,7 +61,7 @@ logger.debug('after trimming to the date range of interest we have shape %s ' % 
 data.drop(['tail', 'year', 'month'], axis=1, inplace=True)
 logger.debug('after dropping columns we have shape %s ' % str(data.shape))
 logger.debug('raw data minimum: %.2f, mean: %.2f, maximum: %.2f' % (
-data['HOURS'].min(), data['HOURS'].mean(), data['HOURS'].max()))
+    data['HOURS'].min(), data['HOURS'].mean(), data['HOURS'].max()))
 
 fleet_monthly = data.groupby(['date'], axis=0).sum()
 logger.debug(fleet_monthly.head(20))
@@ -64,7 +70,6 @@ logger.debug(fleet_monthly.head(20))
 logger.debug('raw monthly data minimum: %.2f, mean: %.2f, maximum: %.2f' % (fleet_monthly.min(), fleet_monthly.mean(),
                                                                             fleet_monthly.max()))
 for order_d in range(3, 4):
-    figure, axes = plt.subplots(nrows=4, figsize=(9, 16))
     model = ARIMA(fleet_monthly, order=(order_d, 1, 0))
     model_fit = model.fit(disp=0)
     logger.debug(model_fit.summary())
@@ -73,15 +78,28 @@ for order_d in range(3, 4):
     forecasted = model_fit.forecast(steps=steps)
     logger.debug('forecast values: %s' % str(forecasted[0]))
 
+    t0 = fleet_monthly.copy(deep=True)
+    logger.debug('fleet_monthly shape: %s, t0 shape: %s' % (str(fleet_monthly.shape), str(t0.shape)))
+    # now add rows
+
+    t1 = pd.DataFrame.from_dict({'date': project_dates(t0.index.max(), steps), 'HOURS': forecasted[0],
+                                 'hours_min': [item[0] for item in forecasted[2]],
+                                 'hours_max': [item[1] for item in forecasted[2]]})
+    t1 = t1.set_index(['date'])
+    t2 = t0.append(t1)
+
     residuals = pd.DataFrame(model_fit.resid)
     logger.debug(residuals.describe())
 
+    figure, axes = plt.subplots(nrows=5, figsize=(9, 16))
     axis = 0
-    fleet_monthly.plot(ax=axes[axis])
+    fleet_monthly.plot(ax=axes[axis], style='.')
+    axis += 1
+    axes[axis].errorbar(t2.index, t2['HOURS'], yerr=[t2['hours_min'], t2['hours_max']], marker='.')
     axis += 1
     autocorrelation_plot(fleet_monthly, ax=axes[axis])
     axis += 1
-    residuals.plot(ax=axes[axis])
+    residuals.plot(ax=axes[axis], style='.')
     axis += 1
     residuals.plot(kind='kde', ax=axes[axis])
     axis += 1
