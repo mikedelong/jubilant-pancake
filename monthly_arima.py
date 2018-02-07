@@ -54,20 +54,34 @@ logger.debug('after trimming to the date range of interest we have shape %s ' % 
 # to get just the data we want lets throw out the tail, month, and date
 data.drop(['tail', 'year', 'month'], axis=1, inplace=True)
 logger.debug('after dropping columns we have shape %s ' % str(data.shape))
-logger.debug(data.head(20))
+logger.debug('raw data minimum: %.2f, mean: %.2f, maximum: %.2f' % (
+data['HOURS'].min(), data['HOURS'].mean(), data['HOURS'].max()))
 
 fleet_monthly = data.groupby(['date'], axis=0).sum()
+logger.debug(fleet_monthly.head(20))
 
-for order_d in range(1, 2):
-    figure, axes = plt.subplots(nrows=3)
-    autocorrelation_plot(fleet_monthly, ax=axes[0])
+# before we go on to the prediction let's look at the summary statistics for the monthly data
+logger.debug('raw monthly data minimum: %.2f, mean: %.2f, maximum: %.2f' % (fleet_monthly.min(), fleet_monthly.mean(),
+                                                                            fleet_monthly.max()))
+for order_d in range(3, 4):
+    figure, axes = plt.subplots(nrows=4)
+    axis = 0
+    # todo plot the monthly data
+    fleet_monthly.plot(ax=axes[axis])
+    axis += 1
+    autocorrelation_plot(fleet_monthly, ax=axes[axis])
+    axis += 1
     model = ARIMA(fleet_monthly, order=(order_d, 1, 0))
     model_fit = model.fit(disp=0)
     logger.debug(model_fit.summary())
     residuals = pd.DataFrame(model_fit.resid)
-    residuals.plot(ax=axes[1])
-    residuals.plot(kind='kde', ax=axes[2])
+    residuals.plot(ax=axes[axis])
+    axis += 1
+    residuals.plot(kind='kde', ax=axes[axis])
+    axis += 1
     logger.debug(residuals.describe())
+    logger.debug('ARIMA residuals minimum: %.2f, mean: %.2f, maximum: %.2f' % (residuals.min(), residuals.mean(),
+                                                                               residuals.max()))
     autocorrelation_plot_file = '{}autocorrelation_plot_{}.png'.format(settings['output_folder'], order_d)
     logger.debug('saving ARIMA plots to %s', autocorrelation_plot_file)
     plt.savefig(autocorrelation_plot_file)
