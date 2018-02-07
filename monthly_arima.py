@@ -63,10 +63,9 @@ logger.debug(fleet_monthly.head(20))
 # before we go on to the prediction let's look at the summary statistics for the monthly data
 logger.debug('raw monthly data minimum: %.2f, mean: %.2f, maximum: %.2f' % (fleet_monthly.min(), fleet_monthly.mean(),
                                                                             fleet_monthly.max()))
-for order_d in range(3, 4):
-    figure, axes = plt.subplots(nrows=4)
+for order_d in range(12, 13):
+    figure, axes = plt.subplots(nrows=4, figsize=(9, 16))
     axis = 0
-    # todo plot the monthly data
     fleet_monthly.plot(ax=axes[axis])
     axis += 1
     autocorrelation_plot(fleet_monthly, ax=axes[axis])
