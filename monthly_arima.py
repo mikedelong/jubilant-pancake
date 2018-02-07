@@ -63,22 +63,28 @@ logger.debug(fleet_monthly.head(20))
 # before we go on to the prediction let's look at the summary statistics for the monthly data
 logger.debug('raw monthly data minimum: %.2f, mean: %.2f, maximum: %.2f' % (fleet_monthly.min(), fleet_monthly.mean(),
                                                                             fleet_monthly.max()))
-for order_d in range(12, 13):
+for order_d in range(3, 4):
     figure, axes = plt.subplots(nrows=4, figsize=(9, 16))
+    model = ARIMA(fleet_monthly, order=(order_d, 1, 0))
+    model_fit = model.fit(disp=0)
+    logger.debug(model_fit.summary())
+    # now let's forecast for 2017
+    steps = 12
+    forecasted = model_fit.forecast(steps=steps)
+    logger.debug('forecast values: %s' % str(forecasted[0]))
+
+    residuals = pd.DataFrame(model_fit.resid)
+    logger.debug(residuals.describe())
+
     axis = 0
     fleet_monthly.plot(ax=axes[axis])
     axis += 1
     autocorrelation_plot(fleet_monthly, ax=axes[axis])
     axis += 1
-    model = ARIMA(fleet_monthly, order=(order_d, 1, 0))
-    model_fit = model.fit(disp=0)
-    logger.debug(model_fit.summary())
-    residuals = pd.DataFrame(model_fit.resid)
     residuals.plot(ax=axes[axis])
     axis += 1
     residuals.plot(kind='kde', ax=axes[axis])
     axis += 1
-    logger.debug(residuals.describe())
     logger.debug('ARIMA residuals minimum: %.2f, mean: %.2f, maximum: %.2f' % (residuals.min(), residuals.mean(),
                                                                                residuals.max()))
     autocorrelation_plot_file = '{}autocorrelation_plot_{}.png'.format(settings['output_folder'], order_d)
@@ -86,11 +92,6 @@ for order_d in range(12, 13):
     plt.tight_layout()
     plt.savefig(autocorrelation_plot_file)
     del figure
-    # now let's forecast for 2017
-    forecasted = model_fit.forecast()
-    logger.debug('forecast values: %s' % str(forecasted))
-    predicted = model_fit.predict(start=84, end=84 + 12)
-    logger.debug('predicted values: %s' % str(predicted))
 
 logger.debug('done')
 finish_time = time.time()
