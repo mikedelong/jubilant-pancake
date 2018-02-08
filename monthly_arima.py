@@ -81,9 +81,10 @@ for order_d in range(4, 5):
     logger.debug('forecast values: %s' % str(forecasted[0]))
 
     monthly_with_forecast = fleet_monthly.append(pd.DataFrame.from_dict(
-        {'date': project_dates(fleet_monthly.index.max(), steps), 'HOURS': forecasted[0],
-         'hours_min': [item[0] for item in forecasted[2]], 'hours_max': [item[1] for item in forecasted[2]]}).set_index(
-        ['date']))
+        {'date': project_dates(fleet_monthly.index.max(), steps),
+         'HOURS': forecasted[0],
+         'hours_min': [item[0] for item in forecasted[2]],
+         'hours_max': [item[1] for item in forecasted[2]]}).set_index(['date']))
 
     logger.debug('monthly with forecast total hours: %.2f' % monthly_with_forecast['HOURS'].sum())
     residuals = pd.DataFrame(model_fit.resid)
