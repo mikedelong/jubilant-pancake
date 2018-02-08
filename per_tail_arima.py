@@ -52,7 +52,7 @@ data = data[data['year'].astype(int) <= 2016]
 data['date'] = np.vectorize(make_date)(data['year'].astype(int), data['month'].astype(int))
 logger.debug('after trimming to the date range of interest we have shape %s ' % str(data.shape))
 
-# to get just the data we want lets throw out the tail, month, and date
+# to get just the data we want lets throw out the month and date
 data.drop(['year', 'month'], axis=1, inplace=True)
 logger.debug('after dropping columns we have shape %s ' % str(data.shape))
 logger.debug('raw data minimum: %.2f, mean: %.2f, maximum: %.2f' % (
