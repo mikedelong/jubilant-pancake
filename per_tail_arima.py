@@ -5,6 +5,7 @@ import json
 import logging
 import time
 
+import numpy as np
 import pandas as pd
 import pandas.tseries.offsets as offsets
 
@@ -39,8 +40,24 @@ with open(settings_file, 'r') as settings_fp:
     settings = json.load(settings_fp)
 
 logger.debug('settings: %s' % settings)
+input_folder = settings['processed_folder']
+full_input_file = input_folder + 'monthly.csv'
+logger.debug('reading input data from %s' % full_input_file)
+data = pd.read_csv(full_input_file)
 
-# code goes here
+# now we want to discard anything before 2010 and after 2016
+data = data[data['year'].astype(int) >= 2010]
+data = data[data['year'].astype(int) <= 2016]
+
+data['date'] = np.vectorize(make_date)(data['year'].astype(int), data['month'].astype(int))
+logger.debug('after trimming to the date range of interest we have shape %s ' % str(data.shape))
+
+# to get just the data we want lets throw out the tail, month, and date
+data.drop(['year', 'month'], axis=1, inplace=True)
+logger.debug('after dropping columns we have shape %s ' % str(data.shape))
+logger.debug('raw data minimum: %.2f, mean: %.2f, maximum: %.2f' % (
+    data['HOURS'].min(), data['HOURS'].mean(), data['HOURS'].max()))
+
 
 logger.debug('done')
 finish_time = time.time()
