@@ -56,7 +56,9 @@ data.drop(['year', 'month'], axis=1, inplace=True)
 logger.debug('after dropping columns we have shape %s ' % str(data.shape))
 logger.debug('raw data minimum: %.2f, mean: %.2f, maximum: %.2f' % (
     data['HOURS'].min(), data['HOURS'].mean(), data['HOURS'].max()))
+logger.debug(data.head(20))
 
+# todo build an ARIMA model for each tail
 
 logger.debug('done')
 finish_time = time.time()
