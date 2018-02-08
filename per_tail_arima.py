@@ -46,8 +46,7 @@ logger.debug('reading input data from %s' % full_input_file)
 data = pd.read_csv(full_input_file)
 
 # now we want to discard anything before 2010 and after 2016
-data = data[data['year'].astype(int) >= 2010]
-data = data[data['year'].astype(int) <= 2016]
+data = data[np.logical_and(data['year'].astype(int) >= 2010, data['year'].astype(int) <= 2016)]
 
 data['date'] = np.vectorize(make_date)(data['year'].astype(int), data['month'].astype(int))
 logger.debug('after trimming to the date range of interest we have shape %s ' % str(data.shape))
