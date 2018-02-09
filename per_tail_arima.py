@@ -90,8 +90,8 @@ for tail in data['tail'].unique():
         steps = 12
         forecast = model_fit.forecast(steps=steps)
         logger.debug('count: %d forecast values: %s' % (forecast_count, str(forecast[0])))
-        logger.debug(
-            'pre and post: %.1f %.1f' % (tail_data['HOURS'].sum(), tail_data['HOURS'].sum() + forecast[0].sum()))
+        known_values_sum = tail_data['HOURS'].sum()
+        logger.debug('pre and post: %.1f %.1f' % (known_values_sum, known_values_sum + forecast[0].sum()))
 
 logger.debug('forecast: %d, over 8000 hours: %d, not flown recently: %d.' % (forecast_count, senior_count, stale_count))
 logger.debug('done')
