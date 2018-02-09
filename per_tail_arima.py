@@ -69,8 +69,8 @@ for tail in data['tail'].unique():
     # todo review this
     tail_data = data.loc[data['tail'] == tail]
     tail_data = tail_data[['date', 'HOURS']]
+    last_date = tail_data['date'].max()
     tail_data.set_index('date', inplace=True)
-    last_date = tail_data.idxmax(axis=0)[0]
     current_hours = totals.get_value(tail, 'HOURS')
 
     # exclude senior tails with more than 8000 flight hours
