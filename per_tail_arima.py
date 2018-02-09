@@ -8,6 +8,7 @@ import time
 import numpy as np
 import pandas as pd
 import pandas.tseries.offsets as offsets
+from statsmodels.tsa.arima_model import ARIMA
 
 start_time = time.time()
 
@@ -45,6 +46,9 @@ full_input_file = input_folder + 'monthly.csv'
 logger.debug('reading input data from %s' % full_input_file)
 data = pd.read_csv(full_input_file)
 
+# first total up the total hours per tail
+totals = data[['tail', 'HOURS']].groupby(['tail']).sum()
+logger.debug('we have hours totals for %d tails.' % totals.shape[0])
 # now we want to discard anything before 2010 and after 2016
 data = data[np.logical_and(data['year'].astype(int) >= 2010, data['year'].astype(int) <= 2016)]
 
@@ -58,7 +62,33 @@ logger.debug('raw data minimum: %.2f, mean: %.2f, maximum: %.2f' % (
     data['HOURS'].min(), data['HOURS'].mean(), data['HOURS'].max()))
 logger.debug(data.head(20))
 
-# todo build an ARIMA model for each tail
+order_d = 4
+stale_count = 0
+senior_count = 0
+for tail in data['tail'].unique():
+    # todo review this
+    tail_data = data.loc[data['tail'] == tail]
+    tail_data = tail_data[['date', 'HOURS']]
+    tail_data.set_index('date', inplace=True)
+    last_date = tail_data.idxmax(axis=0)[0]
+    current_hours = totals.get_value(tail, 'HOURS')
+
+    # exclude senior tails with more than 8000 flight hours
+    if current_hours > 8000:
+        senior_count += 1
+        logger.debug(
+            'count: %d tail %s already has %d hours and will be excluded.' % (senior_count, tail, current_hours))
+    elif last_date.year != 2016 and last_date.month != 12:
+        stale_count += 1
+        logger.debug('count: %d the last day for tail %s is %s' % (stale_count, tail, last_date))
+    else:
+        # for the model to work properly we need the dates to be the index
+        model = ARIMA(tail_data, order=(order_d, 1, 0))
+        model_fit = model.fit(disp=0)
+        # now let's forecast for 2017
+        steps = 12
+        forecasted = model_fit.forecast(steps=steps)
+        logger.debug('forecast values: %s' % str(forecasted[0]))
 
 logger.debug('done')
 finish_time = time.time()
