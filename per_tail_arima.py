@@ -65,6 +65,7 @@ logger.debug(data.head(20))
 order_d = 4
 stale_count = 0
 senior_count = 0
+forecast_count = 0
 for tail in data['tail'].unique():
     # todo review this
     tail_data = data.loc[data['tail'] == tail]
@@ -82,14 +83,16 @@ for tail in data['tail'].unique():
         stale_count += 1
         logger.debug('count: %d the last day for tail %s is %s' % (stale_count, tail, last_date))
     else:
+        forecast_count += 1
         # for the model to work properly we need the dates to be the index
         model = ARIMA(tail_data, order=(order_d, 1, 0))
         model_fit = model.fit(disp=0)
         # now let's forecast for 2017
         steps = 12
-        forecasted = model_fit.forecast(steps=steps)
-        logger.debug('forecast values: %s' % str(forecasted[0]))
+        forecast = model_fit.forecast(steps=steps)
+        logger.debug('count: %d forecast values: %s' % (forecast_count, str(forecast[0])))
 
+logger.debug('forecast: %d, over 8000 hours: %d, not flown recently: %d.' % (forecast_count, senior_count, stale_count))
 logger.debug('done')
 finish_time = time.time()
 elapsed_hours, elapsed_remainder = divmod(finish_time - start_time, 3600)
