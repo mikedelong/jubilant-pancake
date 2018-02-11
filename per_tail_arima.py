@@ -48,6 +48,8 @@ data = pd.read_csv(full_input_file)
 
 # first total up the total hours per tail
 totals = data[['tail', 'HOURS']].groupby(['tail']).sum()
+pre_totals = data[data['year'].astype(int) < 2010].groupby(['tail']).sum()
+pre_totals = pre_totals.drop(['year', 'month'], axis=1)
 logger.debug('we have hours totals for %d tails.' % totals.shape[0])
 # now we want to discard anything before 2010 and after 2016
 data = data[np.logical_and(data['year'].astype(int) >= 2010, data['year'].astype(int) <= 2016)]
@@ -90,7 +92,8 @@ for tail in data['tail'].unique():
         steps = 12
         forecast = model_fit.forecast(steps=steps)
         logger.debug('count: %d forecast values: %s' % (forecast_count, str(forecast[0])))
-        known_values_sum = tail_data['HOURS'].sum()
+        # this will give us the pre-2010 hours plus the ARIMA model's training data hours
+        known_values_sum = tail_data['HOURS'].sum() + pre_totals.get_value(tail, 'HOURS')
         logger.debug('pre and post: %.1f %.1f' % (known_values_sum, known_values_sum + forecast[0].sum()))
 
 logger.debug('forecast: %d, over 8000 hours: %d, not flown recently: %d.' % (forecast_count, senior_count, stale_count))
