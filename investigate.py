@@ -31,7 +31,6 @@ logger.debug('airports data file: %s' % full_airports_file)
 columns_to_use = ['airport', 'city', 'country', 'icao', 'latitude', 'longitude']
 airports_data = pd.read_csv(full_airports_file, index_col=['icao'], header=None, names=columns_to_use,
                             usecols=[1, 2, 3, 5, 6, 7])
-logger.debug(airports_data.head(5))
 logger.debug('airports shape: %s' % str(airports_data.shape))
 
 
@@ -58,6 +57,10 @@ for column in data.columns:
     if 'location' in column.lower():
         unique_values = data[column].unique()
         logger.debug('column %s includes values %s' % (column, unique_values[0:10]))
+        test_data = unique_values[:10]
+        for item in test_data:
+            t0 = airports_data.loc[item]
+            logger.debug(t0[['latitude', 'longitude']])
 
 logger.debug('done')
 finish_time = time.time()
