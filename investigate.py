@@ -1,3 +1,4 @@
+import collections
 import json
 import logging
 import time
@@ -57,10 +58,40 @@ for column in data.columns:
     if 'location' in column.lower():
         unique_values = data[column].unique()
         logger.debug('column %s includes values %s' % (column, unique_values[0:10]))
-        test_data = unique_values[:10]
-        for item in test_data:
-            t0 = airports_data.loc[item]
-            logger.debug(t0[['latitude', 'longitude']])
+        if False:
+            test_data = unique_values[:10]
+            for item in test_data:
+                t0 = airports_data.loc[item]
+                logger.debug(t0[['latitude', 'longitude']])
+
+unique_icao = airports_data.index.unique()
+
+counts = collections.Counter()
+for column in data.columns:
+    if 'location' in column.lower():
+        for item in data[column]:
+            try:
+                counts.update({item.strip() if type(item) is str else item: 1})
+            except TypeError as typeError:
+                logger.warning('%s : %s' % (str(item), typeError))
+
+in_count = 0
+out_count = 0
+for column in data.columns:
+    if 'location' in column.lower():
+        for item in data[column].unique():
+            if item in unique_icao:
+                in_count += 1
+            else:
+                logger.warning('ICAO code %s not in airport ICAO data, has count %d' % (item, counts[item]))
+                out_count += 1
+logger.debug('found %d ICAO matches and %d ICAO misses' % (in_count, out_count))
+most_common = counts.most_common(10)
+size = 2 * data.shape[0]
+logger.debug('the most common ICAO misses are %s' % most_common)
+for item in most_common:
+    logger.debug(
+        'ICAO code %s has %d misses which is %.2f%% of the total' % (item[0], item[1], 100 * float(item[1]) / size))
 
 logger.debug('done')
 finish_time = time.time()
