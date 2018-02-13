@@ -23,6 +23,14 @@ with open(settings_file, 'r') as settings_fp:
 
 logger.debug('settings: %s' % settings)
 
+# first let's load up our airport data
+data_folder = settings['data_folder']
+airports_file = settings['airports_file']
+full_airports_file = data_folder + airports_file
+logger.debug('airports data file: %s' % full_airports_file)
+airports_data = pd.read_csv(full_airports_file, header=None)
+logger.debug(airports_data.head(5))
+
 # now let's load the big input file
 input_folder = settings['input_folder']
 logger.debug('input folder: %s' % input_folder)
@@ -42,6 +50,10 @@ for column in data.columns:
         values = [item.strip() for item in unique_values]
         logger.debug('column %s has the following unique values: %s' % (column, values))
 
+for column in data.columns:
+    if 'location' in column.lower():
+        unique_values = data[column].unique()
+        logger.debug('column %s includes values %s' % (column, unique_values[0:10]))
 
 logger.debug('done')
 finish_time = time.time()
