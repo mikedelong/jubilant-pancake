@@ -28,10 +28,12 @@ data_folder = settings['data_folder']
 airports_file = settings['airports_file']
 full_airports_file = data_folder + airports_file
 logger.debug('airports data file: %s' % full_airports_file)
-column_names = ['airport', 'city', 'country', 'code', 'icao', 'latitude', 'longitude', 'c8', 'c9', 'c10', 'c11', 'c12',
-                'c13']
-airports_data = pd.read_csv(full_airports_file, header=None, names=column_names)
+columns_to_use = ['airport', 'city', 'country', 'icao', 'latitude', 'longitude']
+airports_data = pd.read_csv(full_airports_file, index_col=['icao'], header=None, names=columns_to_use,
+                            usecols=[1, 2, 3, 5, 6, 7])
 logger.debug(airports_data.head(5))
+logger.debug('airports shape: %s' % str(airports_data.shape))
+
 
 # now let's load the big input file
 input_folder = settings['input_folder']
