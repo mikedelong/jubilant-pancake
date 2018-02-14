@@ -17,7 +17,7 @@ console_handler.setLevel(logging.DEBUG)
 logger.debug('started')
 
 # read the input filename from a JSON file
-settings_file = './investigate.json'
+settings_file = './investigate-icao.json'
 logger.debug('settings file : %s' % settings_file)
 with open(settings_file, 'r') as settings_fp:
     settings = json.load(settings_fp)
