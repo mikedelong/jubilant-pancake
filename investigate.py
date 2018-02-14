@@ -32,15 +32,10 @@ full_input_file = input_folder + input_file
 logger.debug('reading input data from %s' % full_input_file)
 data = pd.read_csv(full_input_file)
 logger.debug('read complete: columns are %s' % str(data.columns))
+logger.debug('data shape is %d x %d' % data.shape)
 for column in data.columns:
     unique_value_count = data[column].nunique()
-    if unique_value_count > 10:
-        logger.debug('column %s has %d values and %d unique values.' %
-                     (column, len(data[column]), data[column].nunique()))
-    else:
-        unique_values = data[column].unique()
-        values = [item.strip() for item in unique_values]
-        logger.debug('column %s has the following unique values: %s' % (column, values))
+    logger.debug('column %s has %d values and %d unique values.' % (column, len(data[column]), data[column].nunique()))
 
 logger.debug('done')
 finish_time = time.time()
