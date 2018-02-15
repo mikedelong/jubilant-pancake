@@ -2,6 +2,7 @@ import json
 import logging
 import time
 
+import numpy as np
 import pandas as pd
 
 start_time = time.time()
@@ -40,8 +41,16 @@ full_input_file = input_folder + input_file
 logger.debug('reading input data from %s' % full_input_file)
 
 columns_to_use = settings['columns_to_use']
+str_converters = settings['str_converters']
+converters = dict()
+for item in str_converters:
+    converters[item] = str
 
-data = pd.read_csv(full_input_file, skipinitialspace=True, skip_blank_lines=True, usecols=columns_to_use)
+data = pd.read_csv(full_input_file,
+                   converters=converters,
+                   skip_blank_lines=True,
+                   skipinitialspace=True,
+                   usecols=columns_to_use)
 logger.debug('read complete: columns are %s' % str(data.columns))
 logger.debug('data shape is %d x %d' % data.shape)
 for column in data.columns:
@@ -49,6 +58,9 @@ for column in data.columns:
     logger.debug('column %s has %d values and %d unique values.' % (column, len(data[column]), data[column].nunique()))
     if unique_value_count < 101:
         logger.debug('and here they are: %s' % data[column].unique())
+
+# make the tail number
+data['tail'] = np.vectorize(make_tail)(data['serial_number'])
 
 # now let's look for cases where we can fill in the year
 t0 = data[data['SORTIE_DATE'].astype(int) < 366]
