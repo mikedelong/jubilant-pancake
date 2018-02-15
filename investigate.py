@@ -42,6 +42,7 @@ logger.debug('reading input data from %s' % full_input_file)
 
 columns_to_use = settings['columns_to_use']
 str_converters = settings['str_converters']
+reference_date = settings['reference_date']
 converters = dict()
 for item in str_converters:
     converters[item] = str
@@ -63,9 +64,11 @@ for column in data.columns:
 data['tail'] = np.vectorize(make_tail)(data['serial_number'])
 
 # now let's look for cases where we can fill in the year
-t0 = data[data['SORTIE_DATE'].astype(int) < 366]
-logger.debug('rows with bad date have shape: %d x %d' % t0.shape)
-t1 = data[data['SORTIE_DATE'].astype(int) < 366 & data['YEAR'].notnull()]
+logger.debug('rows with bad date have shape: %d x %d' % data[data[reference_date].astype(int) < 366].shape)
+logger.debug('rows with bad date and not-null year have shape: %d x %d' % data[
+    data[reference_date].astype(int) < 366 & data['YEAR'].notnull()].shape)
+logger.debug('rows with bad date and not-null month have shape: %d x %d' % data[
+    data[reference_date].astype(int) < 366 & data['MONTH'].notnull()].shape)
 logger.debug('done')
 finish_time = time.time()
 elapsed_hours, elapsed_remainder = divmod(finish_time - start_time, 3600)
