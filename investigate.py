@@ -5,6 +5,14 @@ import time
 import pandas as pd
 
 start_time = time.time()
+
+
+def make_tail(arg_serial):
+    arg_serial = arg_serial.strip()
+    result = '-'.join([arg_serial[0:2], arg_serial[-4:]])
+    return result
+
+
 # set up logging
 formatter = logging.Formatter('%(asctime)s : %(name)s :: %(levelname)s : %(message)s')
 logger = logging.getLogger('main')
@@ -41,6 +49,11 @@ for column in data.columns:
     logger.debug('column %s has %d values and %d unique values.' % (column, len(data[column]), data[column].nunique()))
     if unique_value_count < 101:
         logger.debug('and here they are: %s' % data[column].unique())
+
+# now let's look for cases where we can fill in the year
+t0 = data[data['SORTIE_DATE'].astype(int) < 366]
+logger.debug('rows with bad date have shape: %d x %d' % t0.shape)
+t1 = data[data['SORTIE_DATE'].astype(int) < 366 & data['YEAR'].notnull()]
 logger.debug('done')
 finish_time = time.time()
 elapsed_hours, elapsed_remainder = divmod(finish_time - start_time, 3600)
