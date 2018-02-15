@@ -36,7 +36,8 @@ logger.debug('data shape is %d x %d' % data.shape)
 for column in data.columns:
     unique_value_count = data[column].nunique()
     logger.debug('column %s has %d values and %d unique values.' % (column, len(data[column]), data[column].nunique()))
-
+    if unique_value_count < 21:
+        logger.debug('and here they are: %s' % data[column].unique())
 logger.debug('done')
 finish_time = time.time()
 elapsed_hours, elapsed_remainder = divmod(finish_time - start_time, 3600)
