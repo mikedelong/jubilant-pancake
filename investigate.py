@@ -47,10 +47,7 @@ converters = dict()
 for item in str_converters:
     converters[item] = str
 
-data = pd.read_csv(full_input_file,
-                   converters=converters,
-                   skip_blank_lines=True,
-                   skipinitialspace=True,
+data = pd.read_csv(full_input_file, converters=converters, skip_blank_lines=True, skipinitialspace=True,
                    usecols=columns_to_use)
 logger.debug('read complete: columns are %s' % str(data.columns))
 logger.debug('data shape is %d x %d' % data.shape)
