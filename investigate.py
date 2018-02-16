@@ -66,8 +66,9 @@ logger.debug('rows with bad date have shape: %d x %d' % data[data[reference_date
 year_field = settings['year_field']
 logger.debug('rows with bad date and not-null year have shape: %d x %d' % data[
     data[reference_date].astype(int) < 366 & data[year_field].notnull()].shape)
+month_field = settings['month_field']
 logger.debug('rows with bad date and not-null month have shape: %d x %d' % data[
-    data[reference_date].astype(int) < 366 & data['MONTH'].notnull()].shape)
+    data[reference_date].astype(int) < 366 & data[month_field].notnull()].shape)
 logger.debug('done')
 finish_time = time.time()
 elapsed_hours, elapsed_remainder = divmod(finish_time - start_time, 3600)
