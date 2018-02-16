@@ -63,8 +63,9 @@ data['tail'] = np.vectorize(make_tail)(data[serial])
 
 # now let's look for cases where we can fill in the year
 logger.debug('rows with bad date have shape: %d x %d' % data[data[reference_date].astype(int) < 366].shape)
+year_field = settings['year_field']
 logger.debug('rows with bad date and not-null year have shape: %d x %d' % data[
-    data[reference_date].astype(int) < 366 & data['YEAR'].notnull()].shape)
+    data[reference_date].astype(int) < 366 & data[year_field].notnull()].shape)
 logger.debug('rows with bad date and not-null month have shape: %d x %d' % data[
     data[reference_date].astype(int) < 366 & data['MONTH'].notnull()].shape)
 logger.debug('done')
