@@ -57,8 +57,9 @@ for column in data.columns:
     if unique_value_count < 101:
         logger.debug('and here they are: %s' % data[column].unique())
 
+serial = settings['serial']
 # make the tail number
-data['tail'] = np.vectorize(make_tail)(data['serial_number'])
+data['tail'] = np.vectorize(make_tail)(data[serial])
 
 # now let's look for cases where we can fill in the year
 logger.debug('rows with bad date have shape: %d x %d' % data[data[reference_date].astype(int) < 366].shape)
