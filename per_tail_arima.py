@@ -35,7 +35,7 @@ console_handler.setLevel(logging.DEBUG)
 logger.debug('started')
 
 # read the input filename from a JSON file
-settings_file = './settings.json'
+settings_file = './settings-arima.json'
 logger.debug('settings file : %s' % settings_file)
 with open(settings_file, 'r') as settings_fp:
     settings = json.load(settings_fp)
@@ -69,8 +69,10 @@ stale_count = 0
 senior_count = 0
 forecast_senior_count = 0
 forecast_count = 0
-output = pd.DataFrame(columns=['tail', 'EOY2016', 'EOY2016'], index=['tail'])
-for tail in data['tail'].unique():
+tails = data['tail'].unique().tolist()
+ey2016 = list()
+ey2017 = list()
+for tail in tails:
     # todo review this
     tail_data = data.loc[data['tail'] == tail]
     tail_data = tail_data[['date', 'HOURS']]
@@ -95,19 +97,32 @@ for tail in data['tail'].unique():
         # now let's forecast for 2017
         steps = 12
         forecast = model_fit.forecast(steps=steps)
-        # logger.debug('count: %d forecast values: %s' % (forecast_count, str(forecast[0])))
         # this will give us the pre-2010 hours plus the ARIMA model's training data hours
         before_value = tail_data['HOURS'].sum() + pre_totals.get_value(tail, 'HOURS')
         after_value = before_value + forecast[0].sum()
         if after_value > 8000:
             forecast_senior_count += 1
         logger.debug('tail %s EY2016: %.1f EY2017: %.1f' % (tail, before_value, after_value))
+    ey2016.append(before_value)
+    ey2017.append(after_value)
 
-    output.loc[tail] = pd.Series({'EOY2016': before_value, 'EOY2017': after_value})
+    # output = pd.DataFrame(columns=['EOY2016', 'EOY2017'], index=['tail'])
+    # output.loc[tail] = pd.Series({'EOY2016': before_value, 'EOY2017': after_value})
+logger.debug(len(tails))
+logger.debug(len(ey2016))
+logger.debug(len(ey2017))
+
+output = pd.DataFrame.from_dict({'tail': tails, 'EY2016': ey2016, 'EY2017': ey2017})
+
 logger.debug('forecast: %d, over 8000 hours: %d, not flown recently: %d.' % (forecast_count, senior_count, stale_count))
 logger.debug('forecast %d will be over 8000 hours at end of year.' % (senior_count + forecast_senior_count))
 logger.debug('we have %d unique tails and our output object will be %d x %d' %
              (data['tail'].unique().size, output.shape[0], output.shape[1]))
+output_folder = settings['output_folder']
+output_file = settings['output_file']
+full_output_file = output_folder + output_file
+logger.debug('writing modeled results to output file %s' % full_output_file)
+output.to_csv(full_output_file, index=True, header=True)
 logger.debug('done')
 finish_time = time.time()
 elapsed_hours, elapsed_remainder = divmod(finish_time - start_time, 3600)
