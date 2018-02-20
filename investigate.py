@@ -67,13 +67,13 @@ logger.debug('rows with bad date have shape: %d x %d' % bad_date_records.shape)
 year_field = settings['year_field']
 logger.debug('Rows with bad dates have %s unique year-field values' % bad_date_records[year_field].unique())
 logger.debug('Rows with bad dates have the following year-field value counts: %s' %
-             bad_date_records[year_field].value_counts())
+             bad_date_records[year_field].value_counts(dropna=False))
 bad_date_year_valid = bad_date_records[bad_date_records[year_field].astype(int) > 1947]
 
 zero_date_records = data[data[reference_date].astype(int) == 0]
 logger.debug('rows with zero date have shape %d x %d' % zero_date_records.shape)
 logger.debug('Rows with zero dates have the following year-field value counts: %s' %
-             zero_date_records[year_field].value_counts())
+             zero_date_records[year_field].value_counts(dropna=False))
 
 if False:
     logger.debug('rows with bad date and not-null year have shape: %d x %d' % bad_date_year_valid.shape)
