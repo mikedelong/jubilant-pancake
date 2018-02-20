@@ -103,14 +103,8 @@ for tail in tails:
         if after_value > 8000:
             forecast_senior_count += 1
         logger.debug('tail %s EY2016: %.1f EY2017: %.1f' % (tail, before_value, after_value))
-    ey2016.append(before_value)
-    ey2017.append(after_value)
-
-    # output = pd.DataFrame(columns=['EOY2016', 'EOY2017'], index=['tail'])
-    # output.loc[tail] = pd.Series({'EOY2016': before_value, 'EOY2017': after_value})
-logger.debug(len(tails))
-logger.debug(len(ey2016))
-logger.debug(len(ey2017))
+    ey2016.extend([before_value])
+    ey2017.extend([after_value])
 
 output = pd.DataFrame.from_dict({'tail': tails, 'EY2016': ey2016, 'EY2017': ey2017})
 
