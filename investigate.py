@@ -70,8 +70,10 @@ logger.debug('Rows with bad dates have the following year-field value counts: %s
              bad_date_records[year_field].value_counts())
 bad_date_year_valid = bad_date_records[bad_date_records[year_field].astype(int) > 1947]
 
-missing_date_records = data[data[reference_date].astype(int) == 0]
-logger.debug('rows with zero date have shape %d x %d' % missing_date_records.shape)
+zero_date_records = data[data[reference_date].astype(int) == 0]
+logger.debug('rows with zero date have shape %d x %d' % zero_date_records.shape)
+logger.debug('Rows with zero dates have the following year-field value counts: %s' %
+             zero_date_records[year_field].value_counts())
 
 if False:
     logger.debug('rows with bad date and not-null year have shape: %d x %d' % bad_date_year_valid.shape)
@@ -84,7 +86,7 @@ if False:
         data[reference_date].astype(int) < 366 & ~data['PROCESS_TIMESTAMP'].empty].shape)
 
 logger.debug('so we have %d rows with missing year and %d with no date' %
-             (bad_date_records.shape[0], missing_date_records.shape[0]))
+             (bad_date_records.shape[0], zero_date_records.shape[0]))
 logger.debug('done')
 finish_time = time.time()
 elapsed_hours, elapsed_remainder = divmod(finish_time - start_time, 3600)
