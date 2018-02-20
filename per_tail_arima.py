@@ -67,7 +67,9 @@ logger.debug(data.head(20))
 order_d = 4
 stale_count = 0
 senior_count = 0
+forecast_senior_count = 0
 forecast_count = 0
+output = pd.DataFrame(columns=['tail', 'EOY2016', 'EOY2016'], index=['tail'])
 for tail in data['tail'].unique():
     # todo review this
     tail_data = data.loc[data['tail'] == tail]
@@ -76,10 +78,12 @@ for tail in data['tail'].unique():
     tail_data.set_index('date', inplace=True)
     current_hours = totals.get_value(tail, 'HOURS')
 
+    before_value = current_hours
+    after_value = current_hours
     # exclude senior tails with more than 8000 flight hours
     if current_hours > 8000:
         senior_count += 1
-        logger.debug('count: %d tail %s has %d hours and will be excluded.' % (senior_count, tail, current_hours))
+        logger.debug('count: %d tail %s has %.1f hours and will be excluded.' % (senior_count, tail, current_hours))
     elif last_date.year != 2016 and last_date.month != 12:
         stale_count += 1
         logger.debug('count: %d the last day for tail %s is %s' % (stale_count, tail, last_date))
@@ -91,12 +95,19 @@ for tail in data['tail'].unique():
         # now let's forecast for 2017
         steps = 12
         forecast = model_fit.forecast(steps=steps)
-        logger.debug('count: %d forecast values: %s' % (forecast_count, str(forecast[0])))
+        # logger.debug('count: %d forecast values: %s' % (forecast_count, str(forecast[0])))
         # this will give us the pre-2010 hours plus the ARIMA model's training data hours
-        known_values_sum = tail_data['HOURS'].sum() + pre_totals.get_value(tail, 'HOURS')
-        logger.debug('pre and post: %.1f %.1f' % (known_values_sum, known_values_sum + forecast[0].sum()))
+        before_value = tail_data['HOURS'].sum() + pre_totals.get_value(tail, 'HOURS')
+        after_value = before_value + forecast[0].sum()
+        if after_value > 8000:
+            forecast_senior_count += 1
+        logger.debug('tail %s EY2016: %.1f EY2017: %.1f' % (tail, before_value, after_value))
 
+    output.loc[tail] = pd.Series({'EOY2016': before_value, 'EOY2017': after_value})
 logger.debug('forecast: %d, over 8000 hours: %d, not flown recently: %d.' % (forecast_count, senior_count, stale_count))
+logger.debug('forecast %d will be over 8000 hours at end of year.' % (senior_count + forecast_senior_count))
+logger.debug('we have %d unique tails and our output object will be %d x %d' %
+             (data['tail'].unique().size, output.shape[0], output.shape[1]))
 logger.debug('done')
 finish_time = time.time()
 elapsed_hours, elapsed_remainder = divmod(finish_time - start_time, 3600)
