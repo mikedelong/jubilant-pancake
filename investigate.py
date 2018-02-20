@@ -75,9 +75,14 @@ logger.debug('rows with zero date have shape %d x %d' % zero_date_records.shape)
 logger.debug('Rows with zero dates have the following year-field value counts: %s' %
              zero_date_records[year_field].value_counts(dropna=False))
 
+month_field = settings['month_field']
+logger.debug('Rows with bad dates have the following month-field value counts: %s' %
+             bad_date_records[month_field].value_counts(dropna=False))
+logger.debug('Rows with zero dates have the following month-field value counts: %s' %
+             zero_date_records[month_field].value_counts(dropna=False))
+
 if False:
     logger.debug('rows with bad date and not-null year have shape: %d x %d' % bad_date_year_valid.shape)
-    month_field = settings['month_field']
     logger.debug('rows with bad date and not-null month have shape: %d x %d' % data[
         data[reference_date].astype(int) < 366 & ~data[month_field].empty].shape)
     logger.debug('rows with bad date and not-null start date shape: %d x %d' % data[
