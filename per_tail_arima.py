@@ -80,10 +80,10 @@ for tail in tails:
     tail_data.set_index('date', inplace=True)
     current_hours = totals.get_value(tail, 'HOURS')
 
-    before_value = current_hours
+    before_value = tail_data['HOURS'].sum() + pre_totals.get_value(tail, 'HOURS')
     after_value = current_hours
-    # exclude senior tails with more than 8000 flight hours
-    if current_hours > 8000:
+    # exclude senior tails with more than 8000 flight hours as of the end of 2016
+    if before_value > 8000:
         senior_count += 1
         logger.debug('count: %d tail %s has %.1f hours and will be excluded.' % (senior_count, tail, current_hours))
     elif last_date.year != 2016 and last_date.month != 12:
@@ -98,7 +98,6 @@ for tail in tails:
         steps = 12
         forecast = model_fit.forecast(steps=steps)
         # this will give us the pre-2010 hours plus the ARIMA model's training data hours
-        before_value = tail_data['HOURS'].sum() + pre_totals.get_value(tail, 'HOURS')
         after_value = before_value + forecast[0].sum()
         if after_value > 8000:
             forecast_senior_count += 1
