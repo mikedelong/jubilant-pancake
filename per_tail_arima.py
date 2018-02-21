@@ -70,6 +70,7 @@ senior_count = 0
 forecast_senior_count = 0
 forecast_count = 0
 tails = data['tail'].unique().tolist()
+output_tails = list()
 ey2016 = list()
 ey2017 = list()
 for tail in tails:
@@ -78,14 +79,15 @@ for tail in tails:
     tail_data = tail_data[['date', 'HOURS']]
     last_date = tail_data['date'].max()
     tail_data.set_index('date', inplace=True)
-    current_hours = totals.get_value(tail, 'HOURS')
-
     before_value = tail_data['HOURS'].sum() + pre_totals.get_value(tail, 'HOURS')
-    after_value = current_hours
     # exclude senior tails with more than 8000 flight hours as of the end of 2016
     if before_value > 8000:
         senior_count += 1
-        logger.debug('count: %d tail %s has %.1f hours and will be excluded.' % (senior_count, tail, current_hours))
+        logger.debug('count: %d tail %s has %.1f hours and will be excluded.' % (senior_count, tail, before_value))
+        after_value = before_value
+        ey2016.extend([before_value])
+        ey2017.extend([after_value])
+        output_tails.extend([tail])
     elif last_date.year != 2016 and last_date.month != 12:
         stale_count += 1
         logger.debug('count: %d the last day for tail %s is %s' % (stale_count, tail, last_date))
@@ -102,13 +104,15 @@ for tail in tails:
         if after_value > 8000:
             forecast_senior_count += 1
         logger.debug('tail %s EY2016: %.1f EY2017: %.1f' % (tail, before_value, after_value))
-    # todo see if we can calculate this outside the loop
-    ey2016.extend([before_value])
-    ey2017.extend([after_value])
+        # todo see if we can calculate this outside the loop
+        ey2016.extend([before_value])
+        ey2017.extend([after_value])
+        output_tails.extend([tail])
 
 ey2016_over_8000 = [item > 8000 for item in ey2016]
 ey2017_over_8000 = [item > 8000 for item in ey2017]
-output = pd.DataFrame.from_dict({'tail': tails, 'EY2016': ey2016, 'EY16over8k': ey2016_over_8000, 'EY2017': ey2017,
+output = pd.DataFrame.from_dict(
+    {'tail': output_tails, 'EY2016': ey2016, 'EY16over8k': ey2016_over_8000, 'EY2017': ey2017,
                                  'EY17over8k': ey2017_over_8000})
 
 logger.debug('forecast: %d, over 8000 hours: %d, not flown recently: %d.' % (forecast_count, senior_count, stale_count))
