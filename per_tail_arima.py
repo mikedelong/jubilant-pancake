@@ -102,13 +102,14 @@ for tail in tails:
         if after_value > 8000:
             forecast_senior_count += 1
         logger.debug('tail %s EY2016: %.1f EY2017: %.1f' % (tail, before_value, after_value))
+    # todo see if we can calculate this outside the loop
     ey2016.extend([before_value])
     ey2017.extend([after_value])
 
 ey2016_over_8000 = [item > 8000 for item in ey2016]
 ey2017_over_8000 = [item > 8000 for item in ey2017]
 output = pd.DataFrame.from_dict({'tail': tails, 'EY2016': ey2016, 'EY16over8k': ey2016_over_8000, 'EY2017': ey2017,
-                                 'ey17over8k': ey2017_over_8000})
+                                 'EY17over8k': ey2017_over_8000})
 
 logger.debug('forecast: %d, over 8000 hours: %d, not flown recently: %d.' % (forecast_count, senior_count, stale_count))
 logger.debug('forecast %d will be over 8000 hours at end of year.' % (senior_count + forecast_senior_count))
