@@ -64,12 +64,30 @@ logger.debug('raw data minimum: %.2f, mean: %.2f, maximum: %.2f' % (
     data['HOURS'].min(), data['HOURS'].mean(), data['HOURS'].max()))
 logger.debug(data.head(20))
 
+output_folder = settings['output_folder']
+
+# this will get us the hours in 2010-2016 for each tail
+total_hours_per_tail = data[['tail', 'HOURS']].groupby(['tail']).sum()
+# this will get us the last date (in 2010-2016) for each tail
+max_dates = data[['tail', 'date']].groupby(['tail']).max()
+max_dates_file = settings['max_dates_file']
+full_max_dates_filename = output_folder + max_dates_file
+max_dates.to_csv(full_max_dates_filename)
+
+pre_2016_count = max_dates[(max_dates['date'].dt.year != 2016)].shape[0]
+logger.debug('we have %d tails with a max date before 2016' % pre_2016_count)
+
+reference_date = datetime.date(year=2016, month=9, day=30)
+months_count = 'nb_months'
+max_dates[months_count] = ((max_dates['date'].dt.date - reference_date) / np.timedelta64(1, 'M')).astype(int)
+
+# let's calculate how many additional months we would need to get to the end of 2017
 order_d = 4
 stale_count = 0
 senior_count = 0
 forecast_senior_count = 0
 forecast_count = 0
-tails = data['tail'].unique().tolist()
+tails = max_dates[max_dates[months_count] > 0].index.values.tolist()
 output_tails = list()
 ey2016 = list()
 ey2017 = list()
@@ -77,7 +95,6 @@ for tail in tails:
     # todo review this
     tail_data = data.loc[data['tail'] == tail]
     tail_data = tail_data[['date', 'HOURS']]
-    last_date = tail_data['date'].max()
     tail_data.set_index('date', inplace=True)
     before_value = tail_data['HOURS'].sum() + pre_totals.get_value(tail, 'HOURS')
     # exclude senior tails with more than 8000 flight hours as of the end of 2016
@@ -88,16 +105,13 @@ for tail in tails:
         ey2016.extend([before_value])
         ey2017.extend([after_value])
         output_tails.extend([tail])
-    elif last_date.year != 2016 and last_date.month != 12:
-        stale_count += 1
-        logger.debug('count: %d the last day for tail %s is %s' % (stale_count, tail, last_date))
     else:
         forecast_count += 1
         # for the model to work properly we need the dates to be the index
         model = ARIMA(tail_data, order=(order_d, 1, 0))
         model_fit = model.fit(disp=0)
         # now let's forecast for 2017
-        steps = 12
+        steps = max_dates.loc[tail, 'nb_months'] + 12
         forecast = model_fit.forecast(steps=steps)
         # this will give us the pre-2010 hours plus the ARIMA model's training data hours
         after_value = before_value + forecast[0].sum()
@@ -119,7 +133,6 @@ logger.debug('forecast: %d, over 8000 hours: %d, not flown recently: %d.' % (for
 logger.debug('forecast %d will be over 8000 hours at end of year.' % (senior_count + forecast_senior_count))
 logger.debug('we have %d unique tails and our output object will be %d x %d' %
              (data['tail'].unique().size, output.shape[0], output.shape[1]))
-output_folder = settings['output_folder']
 output_file = settings['output_file']
 full_output_file = output_folder + output_file
 logger.debug('writing modeled results to output file %s' % full_output_file)
