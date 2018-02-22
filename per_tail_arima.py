@@ -76,7 +76,7 @@ pre_2016_count = max_dates[(max_dates['date'].dt.year != 2016)].shape[0]
 logger.debug('we have %d tails with a max date before 2016' % pre_2016_count)
 
 reference_date = datetime.date(year=2016, month=9, day=30)
-months_count = 'nb_months'
+months_count = 'months_count'
 max_dates[months_count] = ((max_dates['date'].dt.date - reference_date) / np.timedelta64(1, 'M')).astype(int)
 
 # let's calculate how many additional months we would need to get to the end of 2017
@@ -95,13 +95,12 @@ for tail in tails:
     tail_data = tail_data[['date', 'HOURS']]
     tail_data.set_index('date', inplace=True)
     before_value = tail_data['HOURS'].sum() + pre_totals.get_value(tail, 'HOURS')
+    ey2016.extend([before_value])
     # exclude senior tails with more than 8000 flight hours as of the end of 2016
     if before_value > 8000:
         senior_count += 1
         logger.debug('count: %d tail %s has %.1f hours and will be excluded.' % (senior_count, tail, before_value))
-        after_value = before_value
-        ey2016.extend([before_value])
-        ey2017.extend([after_value])
+        ey2017.extend([before_value])
         output_tails.extend([tail])
     else:
         forecast_count += 1
@@ -109,7 +108,7 @@ for tail in tails:
         model = ARIMA(tail_data, order=(order_d, 1, 0))
         model_fit = model.fit(disp=0)
         # now let's forecast for 2017
-        steps = max_dates.loc[tail, 'nb_months'] + 12
+        steps = max_dates.loc[tail, months_count] + 12
         forecast = model_fit.forecast(steps=steps)
         # this will give us the pre-2010 hours plus the ARIMA model's training data hours
         after_value = before_value + forecast[0].sum()
@@ -117,7 +116,6 @@ for tail in tails:
             forecast_senior_count += 1
         logger.debug('tail %s EY2016: %.1f EY2017: %.1f' % (tail, before_value, after_value))
         # todo see if we can calculate this outside the loop
-        ey2016.extend([before_value])
         ey2017.extend([after_value])
         output_tails.extend([tail])
 
