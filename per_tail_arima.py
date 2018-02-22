@@ -111,22 +111,24 @@ for tail in tails:
         forecast_2017 = model_2017_fit.forecast(steps=max_dates.loc[tail, months_count] + 12)
         # this will give us the pre-2010 hours plus the ARIMA model's training data hours
         after_value_2017 = before_value + forecast_2017[0].sum()
+        ey2017.extend([after_value_2017])
         if after_value_2017 > 8000:
             forecast_senior_count += 1
-        logger.debug('tail %s EY2016: %.1f EY2017: %.1f' % (tail, before_value, after_value_2017))
-        ey2017.extend([after_value_2017])
+            after_value_2018 = after_value_2017
+        else:
 
-        # for the model to work properly we need the dates to be the index
-        model_2018 = ARIMA(tail_data, order=(order_d, 1, 0))
-        model_2018_fit = model_2018.fit(disp=0)
-        # now let's forecast for 2018
-        forecast_2018 = model_2018_fit.forecast(steps=max_dates.loc[tail, months_count] + 24)
-        # this will give us the pre-2010 hours plus the ARIMA model's training data hours
-        after_value_2018 = before_value + forecast_2018[0].sum()
-        if after_value_2018 > 8000:
-            forecast_senior_count += 1
-        logger.debug('tail %s EY2016: %.1f EY2018: %.1f' % (tail, before_value, after_value_2018))
+            # for the model to work properly we need the dates to be the index
+            model_2018 = ARIMA(tail_data, order=(order_d, 1, 0))
+            model_2018_fit = model_2018.fit(disp=0)
+            # now let's forecast for 2018
+            forecast_2018 = model_2018_fit.forecast(steps=max_dates.loc[tail, months_count] + 24)
+            # this will give us the pre-2010 hours plus the ARIMA model's training data hours
+            after_value_2018 = before_value + forecast_2018[0].sum()
+            if after_value_2018 > 8000:
+                forecast_senior_count += 1
         ey2018.extend([after_value_2018])
+        logger.debug('tail %s EY2016: %.1f EY2017: %.1f EY2018: %.1f' %
+                     (tail, before_value, after_value_2017, after_value_2018))
 
 ey2016_over_8000 = [item > 8000 for item in ey2016]
 ey2017_over_8000 = [item > 8000 for item in ey2017]
