@@ -66,8 +66,6 @@ logger.debug(data.head(20))
 
 output_folder = settings['output_folder']
 
-# this will get us the hours in 2010-2016 for each tail
-total_hours_per_tail = data[['tail', 'HOURS']].groupby(['tail']).sum()
 # this will get us the last date (in 2010-2016) for each tail
 max_dates = data[['tail', 'date']].groupby(['tail']).max()
 max_dates_file = settings['max_dates_file']
