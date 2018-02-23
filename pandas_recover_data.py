@@ -66,19 +66,17 @@ if not input_file_check.is_file():
     logger.warning('input file %s does not exist; quitting.')
     sys.exit()
 
+input_headings = settings['input_headings']
+columns_to_use = input_headings
+converters = {input_headings[0]: str, input_headings[1]: str, input_headings[2]: float}
+data = pd.read_csv(full_input_file, usecols=columns_to_use, converters=converters)
+logger.debug('input file read complete.')
+
+# we want to remove the second column because it doesn't tell us anything
+data_columns = data.columns
+logger.debug('our big data frame has column headers %s' % data.columns)
+
 if False:
-    # todo make the input headings a list
-    input_heading_one = settings['input_heading_one']
-    input_heading_two = settings['input_heading_two']
-    input_heading_three = settings['input_heading_three']
-    converters = {input_heading_one: str, input_heading_two: str, input_heading_three: float}
-    data = pd.read_csv(input_file, converters=converters)
-    logger.debug('input file read complete.')
-
-    # we want to remove the second column because it doesn't tell us anything
-    data_columns = data.columns
-    logger.debug('our big data frame has column headers %s' % data.columns)
-
     # todo reconcile this with the fact that our headings are data instead of code now
     column_to_drop = data.columns[1]
     date_column = data.columns[2]  # note that this is before we drop the column above
