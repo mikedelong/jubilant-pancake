@@ -1,7 +1,9 @@
 import datetime
 import json
 import logging
+import sys
 import time
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -54,8 +56,15 @@ active_values = set(active.values)
 
 # read the input file into a data frame
 # now let's load the big input file
+input_folder = settings['input_folder']
 input_file = settings['input_file']
-logger.debug('input file: %s' % input_file)
+full_input_file = input_folder + input_file
+logger.debug('input file: %s' % full_input_file)
+
+input_file_check = Path(full_input_file)
+if not input_file_check.is_file():
+    logger.warning('input file %s does not exist; quitting.')
+    sys.exit()
 
 if False:
     # todo make the input headings a list
