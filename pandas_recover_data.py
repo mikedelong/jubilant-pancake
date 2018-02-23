@@ -52,13 +52,12 @@ active = filter_data[filter_column]
 logger.debug(active.values)
 active_values = set(active.values)
 
+# read the input file into a data frame
+# now let's load the big input file
+input_file = settings['input_file']
+logger.debug('input file: %s' % input_file)
+
 if False:
-
-    # read the input file into a data frame
-    # now let's load the big input file
-    input_file = settings['input_file']
-    logger.debug('input file: %s' % input_file)
-
     # todo make the input headings a list
     input_heading_one = settings['input_heading_one']
     input_heading_two = settings['input_heading_two']
