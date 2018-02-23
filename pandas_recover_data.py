@@ -39,19 +39,20 @@ with open(settings_file, 'r') as settings_fp:
 
 logger.debug('settings: %s' % settings)
 
+# let's do everything to get our filter data before we load anything else
+filter_file = settings['filter_file']
+logger.debug('filter file: %s' % filter_file)
+filter_sheet_name = settings['filter_sheet_name']
+logger.debug('filter sheet name: %s' % filter_sheet_name)
+filter_column = settings['filter_column']
+converters = {filter_column: str}
+filter_data = pd.read_excel(filter_file, sheet_name=filter_sheet_name, converters=converters)
+logger.debug(filter_data.head())
+active = filter_data[filter_column]
+logger.debug(active.values)
+active_values = set(active.values)
+
 if False:
-    # let's do everything to get our filter data before we load anything else
-    filter_file = settings['filter_file']
-    logger.debug('filter file: %s' % filter_file)
-    filter_sheet_name = settings['filter_sheet_name']
-    logger.debug('filter sheet name: %s' % filter_sheet_name)
-    filter_column = settings['filter_column']
-    converters = {filter_column: str}
-    filter_data = pd.read_excel(filter_file, sheet_name=filter_sheet_name, converters=converters)
-    logger.debug(filter_data.head())
-    active = filter_data[filter_column]
-    logger.debug(active.values)
-    active_values = set(active.values)
 
     # read the input file into a data frame
     # now let's load the big input file
