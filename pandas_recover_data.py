@@ -68,8 +68,15 @@ if not input_file_check.is_file():
 
 input_headings = settings['input_headings']
 columns_to_use = input_headings
-types = [str, str, float, float, float]
-converters = {key: value for key in input_headings for value in types}
+str_headings = settings['str_headings']
+# todo this is kind of clumsy; find a better way to do this
+converters = {}
+for heading in input_headings:
+    if heading in str_headings:
+        converters[heading] = str
+    else:
+        converters[heading] = float
+logger.debug(converters)
 data = pd.read_csv(full_input_file, usecols=converters.keys(), converters=converters)
 logger.debug('input file read complete.')
 
@@ -84,22 +91,19 @@ for index in range(3, 5):
     heading = input_headings[index]
     data[heading] = data[heading].astype(int)
 
+# how many columns do we have before dropping?
+logger.debug('before dropping not-actives we have shape %s ' % str(data.shape))
+# drop all the tails that are not in the active set
+serial = input_headings[0]
+data[serial] = np.vectorize(str.strip)(data[serial])
+data = data[data[serial].isin(active_values)]
+logger.debug('after dropping not-actives we have shape %s ' % str(data.shape))
+
+# fix the tail
+data['tail'] = np.vectorize(make_tail)(data[serial])
+logger.debug(data.head())
+
 if False:
-    # todo reconcile this with the fact that our headings are data instead of code now
-    column_to_drop = data.columns[1]
-    date_column = data.columns[2]  # note that this is before we drop the column above
-    logger.debug('before looking for duplicates we are going to drop column %s' % column_to_drop)
-    data.drop(column_to_drop, axis=1, inplace=True)
-
-    # how many columns do we have before dropping?
-    logger.debug('before dropping not-actives we have shape %s ' % str(data.shape))
-
-    # drop all the tails that are not in the active set
-    data[input_heading_one] = np.vectorize(str.strip)(data[input_heading_one])
-    # data.drop(data[data[input_heading_one] not in active_values].index, inplace=True)
-    data = data[data[input_heading_one].isin(active_values)]
-    logger.debug('after dropping not-actives we have shape %s ' % str(data.shape))
-
     # now remove the rows where the date is zero
     data.drop(data[data[input_heading_two] == '0'].index, inplace=True)
     logger.debug('after dropping zero dates we have shape %s ' % str(data.shape))
@@ -108,10 +112,7 @@ if False:
     data['date'] = np.vectorize(make_date)((data[date_column].astype(int) / 1000).astype(int),
                                            (data[date_column].astype(int) % 1000).astype(int))
 
-    # fix the tail
-    data['tail'] = np.vectorize(make_tail)(data[input_heading_one])
 
-    logger.debug(data.head())
 
     output_folder = settings['processed_folder']
     output_file = settings['output_file']
