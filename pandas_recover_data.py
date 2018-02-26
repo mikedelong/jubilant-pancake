@@ -16,9 +16,7 @@ def make_date(arg_year, arg_day, arg_alt_year, arg_alt_month):
         year = 1900 + arg_year if arg_year > 50 else 2000 + arg_year
         result = datetime.date(year, 1, 1) + datetime.timedelta(days=int(arg_day))
     else:
-        year = 1900 + arg_alt_year if arg_alt_year > 50 else 2000 + arg_alt_year
-        month = arg_alt_month
-        result = datetime.date(year, month, 15)
+        result = datetime.date(arg_alt_year, arg_alt_month, 15)
     return result
 
 
