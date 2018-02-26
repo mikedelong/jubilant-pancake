@@ -68,13 +68,21 @@ if not input_file_check.is_file():
 
 input_headings = settings['input_headings']
 columns_to_use = input_headings
-converters = {input_headings[0]: str, input_headings[1]: str, input_headings[2]: float}
-data = pd.read_csv(full_input_file, usecols=columns_to_use, converters=converters)
+types = [str, str, float, float, float]
+converters = {key: value for key in input_headings for value in types}
+data = pd.read_csv(full_input_file, usecols=converters.keys(), converters=converters)
 logger.debug('input file read complete.')
 
 # we want to remove the second column because it doesn't tell us anything
 data_columns = data.columns
 logger.debug('our big data frame has column headers %s' % data.columns)
+for index in range(3, 5):
+    logger.debug(input_headings[index])
+    logger.debug(data[input_headings[index]].value_counts())
+
+for index in range(3, 5):
+    heading = input_headings[index]
+    data[heading] = data[heading].astype(int)
 
 if False:
     # todo reconcile this with the fact that our headings are data instead of code now
