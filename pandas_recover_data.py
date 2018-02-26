@@ -17,6 +17,17 @@ def make_date(arg_year, arg_day):
     return result
 
 
+def make_date2(arg_year, arg_day, arg_alt_year, arg_alt_month):
+    if arg_year != 0:
+        year = 1900 + arg_year if arg_year > 50 else 2000 + arg_year
+        result = datetime.date(year, 1, 1) + datetime.timedelta(days=int(arg_day))
+    else:
+        year = 1900 + arg_alt_year if arg_alt_year > 50 else 2000 + arg_alt_year
+        month = arg_alt_month
+        result = datetime.date(year, month, 15)
+    return result
+
+
 def make_tail(arg_serial):
     arg_serial = arg_serial.strip()
     result = '-'.join([arg_serial[0:2], arg_serial[-4:]])
@@ -102,6 +113,12 @@ logger.debug('after dropping not-actives we have shape %s ' % str(data.shape))
 # fix the tail
 data['tail'] = np.vectorize(make_tail)(data[serial])
 logger.debug(data.head())
+
+year = input_headings[3]
+input_date = input_headings[2]
+# drop everything where the date is invalid and the year is 1947
+data = data[~((data[year].astype(float) == 1947) & (data[input_date].astype(int) < 366))]
+logger.debug('after dropping 1947s our shape is %d x %d' % data.shape)
 
 if False:
     # now remove the rows where the date is zero
