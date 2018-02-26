@@ -11,13 +11,7 @@ import pandas as pd
 start_time = time.time()
 
 
-def make_date(arg_year, arg_day):
-    year = 1900 + arg_year if arg_year > 50 else 2000 + arg_year
-    result = datetime.date(year, 1, 1) + datetime.timedelta(days=int(arg_day))
-    return result
-
-
-def make_date2(arg_year, arg_day, arg_alt_year, arg_alt_month):
+def make_date(arg_year, arg_day, arg_alt_year, arg_alt_month):
     if arg_year != 0:
         year = 1900 + arg_year if arg_year > 50 else 2000 + arg_year
         result = datetime.date(year, 1, 1) + datetime.timedelta(days=int(arg_day))
@@ -120,22 +114,18 @@ input_date = input_headings[2]
 data = data[~((data[year].astype(float) == 1947) & (data[input_date].astype(int) < 366))]
 logger.debug('after dropping 1947s our shape is %d x %d' % data.shape)
 
-if False:
-    # now remove the rows where the date is zero
-    data.drop(data[data[input_heading_two] == '0'].index, inplace=True)
-    logger.debug('after dropping zero dates we have shape %s ' % str(data.shape))
+# now add the date column
+month = input_headings[4]
+data['date'] = np.vectorize(make_date)((data[input_date].astype(int) / 1000).astype(int),
+                                       (data[input_date].astype(int) % 1000).astype(int),
+                                       data[year].astype(int), data[month].astype(int))
 
-    # now add the date column
-    data['date'] = np.vectorize(make_date)((data[date_column].astype(int) / 1000).astype(int),
-                                           (data[date_column].astype(int) % 1000).astype(int))
-
-
-
-    output_folder = settings['processed_folder']
-    output_file = settings['output_file']
-    full_output_file = output_folder + output_file
-    logger.debug('writing output to %s' % full_output_file)
-    data.to_csv(full_output_file, columns=['tail', 'date', input_heading_three], index=False)
+result_heading = input_headings[1]
+output_folder = settings['processed_folder']
+output_file = settings['output_file']
+full_output_file = output_folder + output_file
+logger.debug('writing output to %s' % full_output_file)
+data.to_csv(full_output_file, columns=['tail', 'date', result_heading], index=False)
 
 logger.debug('done')
 finish_time = time.time()
