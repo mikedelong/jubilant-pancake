@@ -48,8 +48,8 @@ data = pd.read_csv(full_input_file)
 
 # first total up the total hours per tail
 totals = data[['tail', 'HOURS']].groupby(['tail']).sum()
-pre_totals = data[data['year'].astype(int) < 2010].groupby(['tail']).sum()
-pre_totals = pre_totals.drop(['year', 'month'], axis=1)
+pre_2010_totals = data[data['year'].astype(int) < 2010].groupby(['tail']).sum()
+pre_2010_totals = pre_2010_totals.drop(['year', 'month'], axis=1)
 logger.debug('we have hours totals for %d tails.' % totals.shape[0])
 # now we want to discard anything before 2010 and after 2016
 data = data[np.logical_and(data['year'].astype(int) >= 2010, data['year'].astype(int) <= 2016)]
@@ -72,16 +72,17 @@ max_dates_file = settings['max_dates_file']
 full_max_dates_filename = output_folder + max_dates_file
 max_dates.to_csv(full_max_dates_filename)
 
-pre_2016_count = max_dates[(max_dates['date'].dt.year != 2016)].shape[0]
+pre_2016_count = max_dates[(max_dates['date'].dt.year < 2016)].shape[0]
 logger.debug('we have %d tails with a max date before 2016' % pre_2016_count)
-
 reference_date = datetime.date(year=2016, month=9, day=30)
+stale_count = max_dates[max_dates['date'].dt.date < reference_date].shape[0]
+logger.debug('we have %d tails with a max date before the reference date' % stale_count)
 months_count = 'months_count'
 max_dates[months_count] = ((max_dates['date'].dt.date - reference_date) / np.timedelta64(1, 'M')).astype(int)
 
 # let's calculate how many additional months we would need to get to the end of 2017
 order_d = 4
-stale_count = 0
+# stale_count = 0
 senior_count = 0
 forecast_senior_count = 0
 forecast_count = 0
@@ -94,7 +95,7 @@ for tail in tails:
     tail_data = data.loc[data['tail'] == tail]
     tail_data = tail_data[['date', 'HOURS']]
     tail_data.set_index('date', inplace=True)
-    before_value = tail_data['HOURS'].sum() + pre_totals.get_value(tail, 'HOURS')
+    before_value = tail_data['HOURS'].sum() + pre_2010_totals.get_value(tail, 'HOURS')
     ey2016.extend([before_value])
     # exclude senior tails with more than 8000 flight hours as of the end of 2016
     if before_value > 8000:
@@ -116,7 +117,6 @@ for tail in tails:
             forecast_senior_count += 1
             after_value_2018 = after_value_2017
         else:
-
             # for the model to work properly we need the dates to be the index
             model_2018 = ARIMA(tail_data, order=(order_d, 1, 0))
             model_2018_fit = model_2018.fit(disp=0)
@@ -131,8 +131,11 @@ for tail in tails:
                      (tail, before_value, after_value_2017, after_value_2018))
 
 ey2016_over_8000 = [item > 8000 for item in ey2016]
+logger.debug('EY 2016 active inventory: %d' % ey2016_over_8000.count(False))
 ey2017_over_8000 = [item > 8000 for item in ey2017]
+logger.debug('EY 2017 active inventory: %d' % ey2017_over_8000.count(False))
 ey2018_over_8000 = [item > 8000 for item in ey2018]
+logger.debug('EY 2018 active inventory: %d' % ey2018_over_8000.count(False))
 
 output = pd.DataFrame.from_dict(
     {'tail': tails,
