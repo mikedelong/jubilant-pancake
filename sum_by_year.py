@@ -39,13 +39,20 @@ data = data.sort_values(['date'], ascending=[True])
 # roll up all annual data
 annual = data.groupby(['tail', data.date.dt.year]).sum()
 logger.debug(annual.head(5))
-annual.to_csv(settings['processed_folder'] + 'annual.csv')
+annual_output_file = settings['annual_output_file']
+output_folder = settings['processed_folder']
+full_annual_output_file = output_folder + annual_output_file
+logger.debug('writing annual hours to %s' % full_annual_output_file)
+annual.to_csv(full_annual_output_file)
 
 # roll up all monthly data
 monthly = data.groupby(['tail', data.date.dt.year, data.date.dt.month]).sum()
 monthly.index.names = ['tail', 'year', 'month']
 logger.debug(monthly.head(5))
-monthly.to_csv(settings['processed_folder'] + 'monthly.csv')
+monthly_output_file = settings['monthly_output_file']
+full_monthly_output_file = output_folder + monthly_output_file
+logger.debug('writing monthly hours to %s' % full_monthly_output_file)
+monthly.to_csv(full_monthly_output_file)
 
 logger.debug('done')
 finish_time = time.time()
