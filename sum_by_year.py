@@ -25,12 +25,11 @@ with open(settings_file, 'r') as settings_fp:
 logger.debug('settings: %s' % settings)
 
 input_folder = settings['processed_folder']
-# todo fix this
-input_file = 'nozeros.csv'
+input_file = settings['input_file']
 
 full_input_file = input_folder + input_file
-
 logger.debug('reading input data from %s' % full_input_file)
+
 data = pd.read_csv(full_input_file, parse_dates=['date'], index_col=['tail'])
 logger.debug('data read complete.')
 logger.debug('our data columns are %s and %s' % (data.columns.values[0], data.columns.values[1]))
